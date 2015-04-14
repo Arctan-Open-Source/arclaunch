@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="/home/matthew/arctan/arclaunch/src/xsd/launch.xsd">
+  <executable>
+    <path absolute="true" os="linux">
+      <directory>bin</directory>
+      <directory>ls</directory>
+    </path>
+  </executable>
+</launch>

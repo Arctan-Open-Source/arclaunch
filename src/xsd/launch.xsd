@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<xsd:schema 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      Launch file schema for Arclaunch Utility v0.0.1
+      Released under MIT License
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:simpleType name="file_name_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        The system file name for either a directory or file
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:restriction base="xsd:normalizedString">
+      <!-- Restrict to 255 characters for file name (254 due to trailing nul characters) -->
+      <xsd:maxLength value="255" />
+      <!-- One or more of any non-forward slash characters -->
+      <xsd:pattern value="[^/]+" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="os_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        An enumeration type used to indicate choice between different operating systems
+        "linux", "unix", "mac os x", and "ms windows" are the current supported values
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <!-- Restrict to the a few major OSes, should expand or allow deeper specification later -->
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="linux" />
+      <xsd:enumeration value="unix" />
+      <xsd:enumeration value="mac os x" />
+      <xsd:enumeration value="ms windows" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="env_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        A type used to allow defining environment variables
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute type="xsd:string" name="key">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+          The environment variable's name
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute type="xsd:string" name="value">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+          The environment variable's value
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="path_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        This is the path excluding the actual file name
+        The directory seperator is system dependent
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:sequence>
+      <xsd:element name="directory" type="file_name_t" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            The name of the directories and final file name which follow the conventions of ordinary file names
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+
+    <xsd:attribute name="os" type="os_t">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+          An attribute indicating the operating system that this path is relevant to
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="absolute" type="xsd:boolean" default="false">
+      <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+          Whether the path is relative or absolute
+          Defaults to false
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="executable_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        The base type for executable elements
+        Requires effective use of xsi:type attribute
+        Can be used straight with binary executables
+        Can be used with executable scripts on systems that support "shebang" interpreter finding
+      </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:sequence>
+      <xsd:element name="path" type="path_t" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            The path to the executable
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="arg" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            Individual arguments passed to the script or program.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <!-- For now, key=value is not strictly enforced -->
+      <xsd:element name="env" type="env_t" minOccurs="0" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            Individual environment variables passed to the script or program.
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  
+  <xsd:complexType name="launch_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        The base element of a launch file
+        Paths of sub-executables will be resolved relative to the path provided for this element
+        If the path resolves to a launch file, the launch file will be used and the further contents of this element ignored
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:complexContent>
+      <xsd:extension base="executable_t">
+        <xsd:sequence>
+          <xsd:element name="executable" type="executable_t" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                An executable that is started up
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="script_t">
+    <xsd:complexContent>
+      <xsd:extension base="executable_t">
+        <xsd:sequence>
+          <xsd:element name="interpreter" type="executable_t" minOccurs="1" maxOccurs="1">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                The executable details of the interpreter used for the script.
+                Requires exactly one, use path details on the executable to vary interpreter by OS
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:element name="launch" type="launch_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        The base element for the launch file
+      </xsd:documentation>
+    </xsd:annotation>
+  </xsd:element>
+  
+</xsd:schema>
