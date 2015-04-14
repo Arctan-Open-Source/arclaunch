@@ -1,3 +1,4 @@
+add_subdirectory(resources)
 add_subdirectory(gtest)
 enable_testing()
 
