@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
+  <executable xsi:type="script">
+    <interpreter>
+      <path absolute="true" os="linux">
+        <directory>usr</directory>
+        <directory>bin</directory>
+        <directory>python</directory>
+      </path>
+    </interpreter>
+    <path absolute="false" os="linux">
+      <directory>..</directory>
+      <directory>script</directory>
+      <directory>argv.py</directory>
+    </path>
+  </executable>
+</launch>

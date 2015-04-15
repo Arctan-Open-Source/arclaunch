@@ -1,3 +1,10 @@
 <?xml version="1.0"?>
 <launch xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
+  <executable>
+    <path absolute="false" os="linux">
+      <directory>argv</directory>
+      <directory>src</directory>
+      <directory>argv</directory>
+    </path>
+  </executable>
 </launch>

@@ -1,0 +1,44 @@
+// This file contains path information for different testing resources
+// Configuration is performed by cmake
+
+// Should always at least be able to execute binary
+#cmakedefine ARGV_BINARY "@ARGV_BINARY@"
+#cmakedefine ARGV_BINARY_LAUNCH "@ARGV_BINARY_LAUNCH@"
+
+// Make sure there's a Python interpreter available
+#cmakedefine PYTHON_INTERPRETER
+#ifdef PYTHON_INTERPRETER
+#cmakedefine ARGV_PYTHON "@ARGV_PYTHON@"
+#cmakedefine ARGV_PYTHON_LAUNCH "@ARGV_PYTHON_LAUNCH@"
+#endif
+
+// Make sure there's a Perl interpreter available
+#cmakedefine PERL_INTERPRETER
+#ifdef PERL_INTERPRETER
+#cmakedefine ARGV_PERL "@ARGV_PERL@"
+#cmakedefine ARGV_PERL_LAUNCH "@ARGV_PERL_LAUNCH@"
+#endif
+
+// Make sure there's an R interpreter available
+#cmakedefine R_INTERPRETER
+#ifdef R_INTERPRETER
+#cmakedefine ARGV_R "@ARGV_R@"
+#cmakedefine ARGV_R_LAUNCH "@ARGV_R_LAUNCH@"
+#endif
+
+// Make sure there's a Julia interpreter available
+#cmakedefine JULIA_INTERPRETER
+#ifdef JULIA_INTERPRETER
+#cmakedefine ARGV_JULIA "@ARGV_JULIA@"
+#cmakedefine ARGV_JULIA_LAUNCH "@ARGV_JULIA_LAUNCH@"
+#endif
+
+// Make sure there's a Matlab installation available
+#cmakedefine MATLAB_INTERPRETER
+#ifdef MATLAB_INTERPRETER
+#cmakedefine ARGV_MATLAB "@ARGV_MATLAB@"
+#cmakedefine ARGV_MATLAB_LAUNCH "@ARGV_MATLAB_LAUNCH@"
+#endif
+
+
+
