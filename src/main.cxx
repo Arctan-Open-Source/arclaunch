@@ -9,7 +9,6 @@ int main(int argc, char** argv) {
     return 1;
   }
   std::cout << "File: " << argv[1] << std::endl;
-  std::string filename(argv[1]);
   try {
     // Create the context and register the necessary node types
     arclaunch::NodeContext ctx;
