@@ -1,0 +1,8 @@
+// This file contains path information for different testing resources
+// Configuration is performed by cmake
+
+// Make sure there's an R interpreter available
+#cmakedefine R_INTERPRETER
+#cmakedefine ARGV_R "@ARGV_R@"
+#cmakedefine ARGV_R_LAUNCH "@ARGV_R_LAUNCH@"
+

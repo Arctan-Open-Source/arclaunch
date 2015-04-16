@@ -1,0 +1,7 @@
+// This file contains path information for different testing resources
+// Configuration is performed by cmake
+
+// Make sure there's a Matlab installation available
+#cmakedefine MATLAB_INTERPRETER
+#cmakedefine ARGV_MATLAB "@ARGV_MATLAB@"
+#cmakedefine ARGV_MATLAB_LAUNCH "@ARGV_MATLAB_LAUNCH@"

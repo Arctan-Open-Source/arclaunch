@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<launch xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
-  <executable>
-    <path absolute="true" os="linux">
-      <directory>bin</directory>
-      <directory>ls</directory>
-    </path>
-  </executable>
-</launch>

@@ -1,0 +1,7 @@
+// This file contains path information for different testing resources
+// Configuration is performed by cmake
+
+// Make sure there's a Julia interpreter available
+#cmakedefine JULIA_INTERPRETER
+#cmakedefine ARGV_JULIA "@ARGV_JULIA@"
+#cmakedefine ARGV_JULIA_LAUNCH "@ARGV_JULIA_LAUNCH@"
