@@ -21,7 +21,7 @@ find_package(XSD REQUIRED)
 
 include_directories(include ${XSD_INCLUDE_DIR} ${CMAKE_BINARY_DIR}/src)
 
-add_subdirectory(include)
 add_subdirectory(src)
+add_subdirectory(include)
 
 add_subdirectory(test)
