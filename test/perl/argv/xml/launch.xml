@@ -4,13 +4,13 @@
     <path absolute="false" os="linux">
       <directory>..</directory>
       <directory>script</directory>
-      <directory>main.py</directory>
+      <directory>main.pl</directory>
     </path>
     <interpreter>
       <path absolute="true" os="linux">
         <directory>usr</directory>
         <directory>bin</directory>
-        <directory>python</directory>
+        <directory>perl</directory>
       </path>
     </interpreter>
   </executable>
