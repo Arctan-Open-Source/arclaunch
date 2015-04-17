@@ -41,6 +41,46 @@
     </xsd:restriction>
   </xsd:simpleType>
 
+  <xsd:simpleType name="in_std_pipe_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        An enumeration type used to indicate one of the standard inputs or outputs
+        "stdin" pipes
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="stdin" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="out_std_pipe_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        An enumeration type used to indicate one of the standard inputs or outputs
+        "stdout" or "stderr" pipes
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="stdout" />
+      <xsd:enumeration value="stderr" />
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:complexType name="linkage_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        This forms a connection between two named executables
+      </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:attribute name="in" type="in_std_pipe_t" />
+    <xsd:attribute name="executable_in" type="xsd:string" />
+    <xsd:attribute name="out" type="out_std_pipe_t" />
+    <xsd:attribute name="executable_out" type="xsd:string" />
+  </xsd:complexType>
+
   <xsd:complexType name="env_t">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
@@ -133,6 +173,7 @@
         </xsd:annotation>
       </xsd:element>
     </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" default="" use="optional" />
   </xsd:complexType>
   
   <xsd:complexType name="launch_t">
@@ -151,6 +192,13 @@
             <xsd:annotation>
               <xsd:documentation xml:lang="en">
                 An executable that is started up
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="linkage" type="linkage_t">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                Used to redirect standard pipes between executables
               </xsd:documentation>
             </xsd:annotation>
           </xsd:element>
