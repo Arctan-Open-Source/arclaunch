@@ -13,9 +13,9 @@ public:
   virtual bool isRunning() const;
   virtual pid_t getPid() const;
   virtual void waitFor() const;
-  virtual int stdin_fd() const;
-  virtual int stdout_fd() const;
-  virtual int stderr_fd() const;
+  virtual int stdinFd() const;
+  virtual int stdoutFd() const;
+  virtual int stderrFd() const;
 };
 
 }

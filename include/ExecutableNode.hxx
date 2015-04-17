@@ -7,18 +7,18 @@ namespace arclaunch {
 class ExecutableNode : public Node {
 private:
   pid_t pid;
-  int in_fd;
-  int out_fd;
-  int err_fd;
+  int inFd;
+  int outFd;
+  int errFd;
 public:
   ExecutableNode(NodeContext& ctx, executable_t* elem, executable_t::arg_sequence& args, executable_t::env_sequence& envs);
   virtual ~ExecutableNode();
   virtual bool isRunning() const;
   virtual pid_t getPid() const;
   virtual void waitFor() const;
-  virtual int stdin_fd() const;
-  virtual int stdout_fd() const;
-  virtual int stderr_fd() const;
+  virtual int stdinFd() const;
+  virtual int stdoutFd() const;
+  virtual int stderrFd() const;
 };
 
 }

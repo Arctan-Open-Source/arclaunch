@@ -25,9 +25,9 @@ public:
   virtual void waitFor() const = 0;
   // The other end of the various file descriptors
   // Very much low-level action
-  virtual int stdin_fd() const = 0;
-  virtual int stdout_fd() const = 0;
-  virtual int stderr_fd() const = 0;
+  virtual int stdinFd() const = 0;
+  virtual int stdoutFd() const = 0;
+  virtual int stderrFd() const = 0;
   static std::vector<std::vector<char> > argSequenceToArgData(executable_t::arg_sequence& args);
   static std::vector<std::vector<char> > envSequenceToEnvData(executable_t::env_sequence& envs);
   static executable_t::arg_sequence fuseArgSequence(executable_t::arg_sequence& args1, executable_t::arg_sequence& args2);

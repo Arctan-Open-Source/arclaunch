@@ -24,16 +24,16 @@ void ScriptNode::waitFor() const {
   return interpreter->waitFor();
 }
 
-int ScriptNode::stdin_fd() const {
-  return interpreter->stdin_fd();
+int ScriptNode::stdinFd() const {
+  return interpreter->stdinFd();
 }
 
-int ScriptNode::stdout_fd() const {
-  return interpreter->stdout_fd();
+int ScriptNode::stdoutFd() const {
+  return interpreter->stdoutFd();
 }
 
-int ScriptNode::stderr_fd() const {
-  return interpreter->stderr_fd();
+int ScriptNode::stderrFd() const {
+  return interpreter->stderrFd();
 }
 
 }

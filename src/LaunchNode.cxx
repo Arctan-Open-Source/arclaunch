@@ -4,6 +4,21 @@
 namespace arclaunch {
 // LaunchNode
 LaunchNode::LaunchNode(NodeContext& ctx, launch_t* launchElem, executable_t::arg_sequence& args, executable_t::env_sequence& envs) {
+  // open pipes for stdin, stdout, and stderr mapping
+  int success;
+  int stdinPipes[2];
+  int stdoutPipes[2];
+  int stderrPipes[2];
+  // TODO: throw an error if opening a pipe fails
+  success = pipe(stdinPipes);
+  success = pipe(stdoutPipes);
+  success = pipe(stderrPipes);
+  // transmitting end of stdin
+  inFd = stdinPipes[1];
+  // receiving end of stdout
+  outFd = stdoutPipes[0];
+  // receiving end of stderr
+  errFd = stderrPipes[0];
   // Emplace nodes based on the launch element's children
   for(launch_t::executable_iterator it = launchElem->executable().begin(); 
     it < launchElem->executable().end(); it++) {
@@ -32,16 +47,16 @@ void LaunchNode::waitFor() const {
   }
 }
 
-int LaunchNode::stdin_fd() const {
-  return in_fd;
+int LaunchNode::stdinFd() const {
+  return inFd;
 }
 
-int LaunchNode::stdout_fd() const {
-  return out_fd;
+int LaunchNode::stdoutFd() const {
+  return outFd;
 }
 
-int LaunchNode::stderr_fd() const {
-  return err_fd;
+int LaunchNode::stderrFd() const {
+  return errFd;
 }
 
 }
