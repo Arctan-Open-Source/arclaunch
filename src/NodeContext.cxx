@@ -8,12 +8,12 @@ void NodeContext::recognize(NodeStorage* store) {
 }
 
 // Assumes that notifications about the least specific elements are submitted first
-Node* NodeContext::execute(executable_t* elem, executable_t::arg_sequence args, executable_t::env_sequence envs) {
+Node* NodeContext::execute(file_t* elem) {
   Node* node;
   for(std::vector<NodeStorage*>::reverse_iterator it = storages.rbegin();
     it != storages.rend(); it++)
   {
-    if((node = (*it)->construct(*this, elem, args, envs)) != NULL)
+    if((node = (*it)->construct(*this, elem)) != NULL)
     {
       // Store a reference to the created node
       nodes.push_back(node);

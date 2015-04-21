@@ -7,7 +7,7 @@ namespace arclaunch {
 class NodeStorage {
 public:
   virtual ~NodeStorage();
-  virtual Node* construct(NodeContext& ctx, executable_t* gNode, executable_t::arg_sequence& args, executable_t::env_sequence& envs) = 0;
+  virtual Node* construct(NodeContext& ctx, file_t* gNode) = 0;
 };
 
 }

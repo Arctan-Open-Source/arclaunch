@@ -9,6 +9,7 @@ add_library(arclaunch
   Node.cxx
   NodeStorage.cxx
   NodeContext.cxx
+  FileNode.cxx
   ExecutableNode.cxx
   ScriptNode.cxx
   LaunchNode.cxx

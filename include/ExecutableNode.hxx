@@ -8,17 +8,26 @@ class ExecutableNode : public Node {
 private:
   pid_t pid;
   int inFd;
-  int outFd;
-  int errFd;
+  int outFdRead;
+  int outFdWrite;
+  int errFdRead;
+  int errFdWrite;
+  executable_t* elemRef;
+  executable_t::path_sequence pathSeq;
+  executable_t::arg_sequence argSeq;
+  executable_t::env_sequence envSeq;
 public:
-  ExecutableNode(NodeContext& ctx, executable_t* elem, executable_t::arg_sequence& args, executable_t::env_sequence& envs);
+  ExecutableNode(NodeContext& ctx, executable_t* elem);
   virtual ~ExecutableNode();
+  virtual void startup();
   virtual bool isRunning() const;
   virtual pid_t getPid() const;
   virtual void waitFor() const;
-  virtual int stdinFd() const;
-  virtual int stdoutFd() const;
-  virtual int stderrFd() const;
+  virtual void linkStdin(int fd);
+  virtual int getStdout();
+  virtual int getStderr();
+  virtual void appendArguments(executable_t::arg_sequence& args);
+  virtual void appendEnvironment(executable_t::env_sequence& env);
 };
 
 }

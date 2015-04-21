@@ -5,26 +5,24 @@
 namespace arclaunch {
 
 class LaunchNode : public Node {
-  typedef std::vector<Node*>::iterator node_iterator;
-  typedef std::vector<Node*>::const_iterator const_node_iterator;
+  typedef std::map<std::string, Node*>::iterator node_iterator;
+  typedef std::map<std::string, Node*>::const_iterator const_node_iterator;
 private:
   launch_t* interior;
-  int inFd;
-  int outFd;
-  int errFd;
-  std::vector<Node*> nodes;
+  std::map<std::string, Node*> nodes;
+  // file descriptors
+  std::map<std::string, int> files;
 public:
-  LaunchNode(NodeContext& ctx, launch_t* launchElem, executable_t::arg_sequence& args, executable_t::env_sequence& envs);
+  LaunchNode(NodeContext& ctx, launch_t* launchElem);
   virtual ~LaunchNode();
+  virtual void startup();
   virtual bool isRunning() const;
   virtual pid_t getPid() const;
   virtual void waitFor() const;
-  // Multiplexes stdout and stderr
-  // Repeats stdin to all sub-nodes
-  // Really, a very ugly answer
-  virtual int stdinFd() const;
-  virtual int stdoutFd() const;
-  virtual int stderrFd() const;
+  // Very strange contortions can occur from here
+  virtual void linkStdin(int fd);
+  virtual int getStdout();
+  virtual int getStderr();
 };
 
 }
