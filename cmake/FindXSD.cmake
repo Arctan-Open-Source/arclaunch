@@ -128,14 +128,14 @@ FUNCTION( XSD_SCHEMA NAME FILE )
   SET( xs_HXX "${CMAKE_CURRENT_BINARY_DIR}/${xs_FILE}.hxx" )
   SET( xs_IXX "${CMAKE_CURRENT_BINARY_DIR}/${xs_FILE}.ixx" )
   
-  message(STATUS "Generates: ${xs_CXX}, ${xs_HXX}, ${xs_IXX}")
-
   #
   # Add the source files to the NAME variable, which presumably will be used to
   # define the source of another target.
   #
   LIST( APPEND ${NAME} ${xs_CXX} )
   SET(${NAME} "${${NAME}}" PARENT_SCOPE)
+  
+  SET(${NAME}_HEADER "${xs_HXX}" PARENT_SCOPE)
 
   #
   # Set up a generator for the output files from the given schema file using

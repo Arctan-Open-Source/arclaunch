@@ -41,6 +41,19 @@
     </xsd:restriction>
   </xsd:simpleType>
 
+  <xsd:complexType name="linkage_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        This forms a connection between two named executables
+      </xsd:documentation>
+    </xsd:annotation>
+
+    <!-- stdin of a program or write to a file -->
+    <xsd:attribute name="in" type="xsd:string" />
+    <!-- stdout of a program or read from a file -->
+    <xsd:attribute name="out" type="xsd:string" />
+  </xsd:complexType>
+
   <xsd:complexType name="env_t">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
@@ -99,6 +112,27 @@
     </xsd:attribute>
   </xsd:complexType>
 
+  <xsd:complexType name="file_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        The base type for files
+        in order to ensure an executable is run
+        the correct xsi:type must be provided 
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:sequence>
+      <xsd:element name="path" type="path_t" minOccurs="1" maxOccurs="unbounded">
+        <xsd:annotation>
+          <xsd:documentation xml:lang="en">
+            The path to the file
+          </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required" />
+  </xsd:complexType>
+  
   <xsd:complexType name="executable_t">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
@@ -109,32 +143,29 @@
       </xsd:documentation>
     </xsd:annotation>
 
-    <xsd:sequence>
-      <xsd:element name="path" type="path_t" minOccurs="0" maxOccurs="unbounded">
-        <xsd:annotation>
-          <xsd:documentation xml:lang="en">
-            The path to the executable
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <xsd:element name="arg" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
-        <xsd:annotation>
-          <xsd:documentation xml:lang="en">
-            Individual arguments passed to the script or program.
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-      <!-- For now, key=value is not strictly enforced -->
-      <xsd:element name="env" type="env_t" minOccurs="0" maxOccurs="unbounded">
-        <xsd:annotation>
-          <xsd:documentation xml:lang="en">
-            Individual environment variables passed to the script or program.
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-    </xsd:sequence>
+    <xsd:complexContent>
+      <xsd:extension base="file_t">
+        <xsd:sequence>
+          <xsd:element name="arg" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                Individual arguments passed to the script or program.
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <!-- For now, key=value is not strictly enforced -->
+          <xsd:element name="env" type="env_t" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                Individual environment variables passed to the script or program.
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
   </xsd:complexType>
-  
+
   <xsd:complexType name="launch_t">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
@@ -145,12 +176,20 @@
     </xsd:annotation>
     
     <xsd:complexContent>
+      <!-- Absolutely requires use of xsi:type in order to function correctly -->
       <xsd:extension base="executable_t">
         <xsd:sequence>
-          <xsd:element name="executable" type="executable_t" minOccurs="0" maxOccurs="unbounded">
+          <xsd:element name="node" type="file_t" minOccurs="0" maxOccurs="unbounded">
             <xsd:annotation>
               <xsd:documentation xml:lang="en">
                 An executable that is started up
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+          <xsd:element name="linkage" type="linkage_t" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                Used to redirect standard pipes between executables
               </xsd:documentation>
             </xsd:annotation>
           </xsd:element>
@@ -182,6 +221,20 @@
         The base element for the launch file
       </xsd:documentation>
     </xsd:annotation>
+    
+    <!-- Things are about to get a bit crazy with unique, key, and keyref -->
+    <xsd:key name="nodes">
+      <xsd:selector xpath="node" />
+      <xsd:field xpath="@name" />
+    </xsd:key>
+    <xsd:keyref name="input_destinations" refer="nodes">
+      <xsd:selector xpath="linkage" />
+      <xsd:field xpath="@in" />
+    </xsd:keyref>
+    <xsd:keyref name="output_sources" refer="nodes">
+      <xsd:selector xpath="linkage" />
+      <xsd:field xpath="@out" />
+    </xsd:keyref>
   </xsd:element>
   
 </xsd:schema>
