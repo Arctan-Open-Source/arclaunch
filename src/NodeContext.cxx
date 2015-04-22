@@ -3,12 +3,12 @@
 namespace arclaunch {
 
 // NodeContext
-void NodeContext::recognize(NodeStorage* store) {
-  storages.push_back(store);
+void NodeContext::recognize(NodeStorage& store) {
+  storages.push_back(&store);
 }
 
 // Assumes that notifications about the least specific elements are submitted first
-Node* NodeContext::execute(file_t* elem) {
+Node& NodeContext::execute(const file_t& elem) {
   Node* node;
   for(std::vector<NodeStorage*>::reverse_iterator it = storages.rbegin();
     it != storages.rend(); it++)
@@ -21,7 +21,7 @@ Node* NodeContext::execute(file_t* elem) {
     }
   }
   // Return a reference to the created node or null
-  return node;
+  return *node;
 }
 
 NodeContext::~NodeContext() {}

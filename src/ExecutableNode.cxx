@@ -2,15 +2,17 @@
 #include <sys/wait.h>
 #include <exception>
 
+// TODO: remove std::cout markers
+#include <iostream>
+
 namespace arclaunch {
 // ExecutableNode
-ExecutableNode::ExecutableNode(NodeContext& ctx, executable_t* elem) {
+ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
   // 
   inFd = 0;
-  elemRef = elem;
-  pathSeq = elem->path();
-  argSeq = elem->arg();
-  envSeq = elem->env();
+  pathSeq = elem.path();
+  argSeq = elem.arg();
+  envSeq = elem.env();
   
   // This is where fork-exec happens
   // Create three pipes
@@ -29,6 +31,7 @@ ExecutableNode::ExecutableNode(NodeContext& ctx, executable_t* elem) {
   // Store the pipe to reroute stderr
   errFdRead = stderrPipes[0];
   errFdWrite = stderrPipes[1];
+  std::cout << "Constructed Executable Node" << std::endl;
 }
 
 void ExecutableNode::startup() {
@@ -124,11 +127,11 @@ int ExecutableNode::getStderr() {
   return errFdRead;
 }
 
-void ExecutableNode::appendArguments(executable_t::arg_sequence& args) {
+void ExecutableNode::appendArguments(const executable_t::arg_sequence& args) {
   argSeq.insert(argSeq.end(), args.begin(), args.end());
 }
 
-void ExecutableNode::appendEnvironment(executable_t::env_sequence& envs) {
+void ExecutableNode::appendEnvironment(const executable_t::env_sequence& envs) {
   envSeq.insert(envSeq.end(), envs.begin(), envs.end());
 }
 

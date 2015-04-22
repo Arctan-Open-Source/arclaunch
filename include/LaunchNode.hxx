@@ -13,7 +13,7 @@ private:
   // file descriptors
   std::map<std::string, int> files;
 public:
-  LaunchNode(NodeContext& ctx, launch_t* launchElem);
+  LaunchNode(NodeContext& ctx, const launch_t& launchElem);
   virtual ~LaunchNode();
   virtual void startup();
   virtual bool isRunning() const;

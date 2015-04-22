@@ -122,7 +122,7 @@
     </xsd:annotation>
     
     <xsd:sequence>
-      <xsd:element name="path" type="path_t" minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="path" type="path_t" minOccurs="0" maxOccurs="unbounded">
         <xsd:annotation>
           <xsd:documentation xml:lang="en">
             The path to the file

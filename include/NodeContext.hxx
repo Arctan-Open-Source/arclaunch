@@ -13,9 +13,9 @@ private:
 public:
   virtual ~NodeContext();
   // Registers a type of node storage
-  void recognize(NodeStorage* store);
+  void recognize(NodeStorage& store);
   // Executes a node based on its dynamic type
-  Node* execute(file_t* executableElem);
+  Node& execute(const file_t& executableElem);
 };
 
 // Use a templatized notify function
@@ -27,9 +27,9 @@ void notify(NodeContext& ctx) {
     std::vector<Derived> nodes;
   public:
     virtual ~Storage() {};
-    Node* construct(NodeContext& ctx, file_t* gNode) {
-      if(Contained* sNode = dynamic_cast<Contained*>(gNode)) {
-        nodes.emplace_back(ctx, sNode);
+    Node* construct(NodeContext& ctx, const file_t& gNode) {
+      if(const Contained* sNode = dynamic_cast<const Contained*>(&gNode)) {
+        nodes.emplace_back(ctx, *sNode);
         return &nodes.back();
       }
       return NULL;
@@ -37,7 +37,7 @@ void notify(NodeContext& ctx) {
   };
   // This is where memory for all the nodes are allocated
   static Storage nodeStorage;
-  ctx.recognize(&nodeStorage);
+  ctx.recognize(nodeStorage);
 }
 
 }

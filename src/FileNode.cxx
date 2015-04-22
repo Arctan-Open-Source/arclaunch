@@ -2,7 +2,7 @@
 
 namespace arclaunch {
 
-FileNode::FileNode(NodeContext& ctx, file_t* elem) {
+FileNode::FileNode(NodeContext& ctx, const file_t& elem) {
 }
 
 FileNode::~FileNode() {

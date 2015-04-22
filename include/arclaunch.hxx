@@ -3,6 +3,7 @@
 #include "Node.hxx"
 #include "NodeStorage.hxx"
 #include "NodeContext.hxx"
+#include "FileNode.hxx"
 #include "ExecutableNode.hxx"
 #include "ScriptNode.hxx"
 #include "LaunchNode.hxx"

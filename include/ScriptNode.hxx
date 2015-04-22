@@ -8,7 +8,7 @@ private:
   Node* interpreter;
   script_t* appended;
 public:
-  ScriptNode(NodeContext& ctx, script_t* scriptElem);
+  ScriptNode(NodeContext& ctx, const script_t& scriptElem);
   virtual ~ScriptNode();
 };
 

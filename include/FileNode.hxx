@@ -4,11 +4,11 @@
 
 namespace arclaunch {
 
-class FileNode : Node {
-public:
-  int fd;
+class FileNode : public Node {
 private:
-  FileNode(NodeContext& ctx, file_t* elem);
+  int fd;
+public:
+  FileNode(NodeContext& ctx, const file_t& elem);
   virtual ~FileNode();
   virtual void startup();
   virtual bool isRunning() const;

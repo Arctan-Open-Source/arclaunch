@@ -12,12 +12,11 @@ private:
   int outFdWrite;
   int errFdRead;
   int errFdWrite;
-  executable_t* elemRef;
   executable_t::path_sequence pathSeq;
   executable_t::arg_sequence argSeq;
   executable_t::env_sequence envSeq;
 public:
-  ExecutableNode(NodeContext& ctx, executable_t* elem);
+  ExecutableNode(NodeContext& ctx, const executable_t& elem);
   virtual ~ExecutableNode();
   virtual void startup();
   virtual bool isRunning() const;
@@ -26,8 +25,8 @@ public:
   virtual void linkStdin(int fd);
   virtual int getStdout();
   virtual int getStderr();
-  virtual void appendArguments(executable_t::arg_sequence& args);
-  virtual void appendEnvironment(executable_t::env_sequence& env);
+  virtual void appendArguments(const executable_t::arg_sequence& args);
+  virtual void appendEnvironment(const executable_t::env_sequence& env);
 };
 
 }
