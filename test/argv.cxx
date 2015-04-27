@@ -2,6 +2,7 @@
 #include "arclaunch.hxx"
 #include "locations.hxx"
 #include "interpret_error.h"
+#include "drain_fd.h"
 
 // This is a test class for Node.hxx
 // ensures that executables do in-fact get started up
@@ -32,33 +33,9 @@ TEST_F(NodeTest, run_argv) {
   // Access a subprocess
   // Let the process complete
   subElem->waitFor();
-  // should not read any bytes but shouldn't give an error
-  char data[50];
-  ssize_t numread;
-  ssize_t cumread;
-  int limit;
-
-  // Ensure that nothing is read from stderr
-  cumread = 0;
-  limit = 5;
-  do {
-    numread = read(subElem->getStderr(), data, 49);
-    data[numread] = '\0';
-    std::cout << data;
-    limit--;
-    cumread += numread;
-  } while(numread > 0 && limit > 0);
-  EXPECT_EQ(0, cumread);
-  
-  // Ensure that something is read from stdout
-  cumread = 0;
-  limit = 5;
-  do {
-    numread = read(subElem->getStdout(), data, 49);
-    data[numread] = '\0';
-    std::cout << data;
-    limit--;
-    cumread += numread;
-  } while(numread > 0 && limit > 0);
-  EXPECT_NE(0, cumread);
+  std::string empty("");
+  std::string err(drainFd(subElem->getStderr()));
+  std::string out(drainFd(subElem->getStdout()));
+  EXPECT_EQ(empty, err);
+  EXPECT_NE(empty, out);
 }

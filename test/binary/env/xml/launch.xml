@@ -2,7 +2,6 @@
 <launch name="env_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
   <node name="env" xsi:type="executable_t">
     <path absolute="false" os="linux">
-      <directory>env</directory>
       <directory>src</directory>
       <directory>env</directory>
     </path>

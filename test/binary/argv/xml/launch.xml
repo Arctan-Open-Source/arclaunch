@@ -3,7 +3,6 @@
   <node name="argv" xsi:type="executable_t">
     <path absolute="false" os="linux">
       <!-- relative paths needs to be relative to the location at which the tool is run -->
-      <directory>argv</directory>
       <directory>src</directory>
       <directory>argv</directory>
     </path>
