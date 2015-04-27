@@ -55,6 +55,7 @@ std::vector<char> Node::pathElemToPathData(const path_t& pathElem) {
     add_seperator = true;
     path.insert(path.end(), it->begin(), it->end());
   }
+  path.push_back('\0');
   return path;
 }
 

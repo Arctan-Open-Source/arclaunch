@@ -4,3 +4,6 @@
 // Should always at least be able to execute binary
 #cmakedefine ARGV "@ARGV@"
 #cmakedefine ARGV_LAUNCH "@ARGV_LAUNCH@"
+
+#cmakedefine ENV "@ENV@"
+#cmakedefine ENV_LAUNCH "@ENV_LAUNCH@"
