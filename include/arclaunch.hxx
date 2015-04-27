@@ -8,3 +8,22 @@
 #include "ScriptNode.hxx"
 #include "LaunchNode.hxx"
 
+
+#include <iostream>
+namespace arclaunch {
+
+// Create a basic, already populated context
+NodeContext& context() {
+  static bool first(true);
+  static NodeContext ctx;
+  if(first) {
+    notify<FileNode, file_t>(ctx);
+    notify<ExecutableNode, executable_t>(ctx);
+    notify<ScriptNode, script_t>(ctx);
+    notify<LaunchNode, launch_t>(ctx);
+    first = false;
+  }
+  return ctx;
+}
+
+}

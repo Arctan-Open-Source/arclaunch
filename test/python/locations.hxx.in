@@ -1,7 +1,0 @@
-// This file contains path information for different testing resources
-// Configuration is performed by cmake
-
-// Make sure there's a Python interpreter available
-#cmakedefine PYTHON_EXECUTABLE
-#cmakedefine ARGV_PYTHON "@ARGV_PYTHON@"
-#cmakedefine ARGV_PYTHON_LAUNCH "@ARGV_PYTHON_LAUNCH@"

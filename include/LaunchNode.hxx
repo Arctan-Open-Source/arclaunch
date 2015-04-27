@@ -23,6 +23,7 @@ public:
   virtual void linkStdin(int fd);
   virtual int getStdout();
   virtual int getStderr();
+  Node& getNode(std::string name);
 };
 
 }

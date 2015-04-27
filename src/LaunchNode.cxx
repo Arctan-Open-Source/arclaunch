@@ -85,4 +85,8 @@ int LaunchNode::getStderr() {
   return 0;
 }
 
+Node& LaunchNode::getNode(std::string name) {
+  return *nodes[name];
+}
+
 }

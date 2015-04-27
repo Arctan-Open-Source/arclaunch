@@ -1,8 +1,0 @@
-// This file contains path information for different testing resources
-// Configuration is performed by cmake
-
-// Make sure there's a Perl interpreter available
-#cmakedefine PERL_EXECUTABLE
-#cmakedefine ARGV_PERL "@ARGV_PERL@"
-#cmakedefine ARGV_PERL_LAUNCH "@ARGV_PERL_LAUNCH@"
-

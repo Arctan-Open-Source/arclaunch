@@ -2,5 +2,5 @@
 // Configuration is performed by cmake
 
 // Should always at least be able to execute binary
-#cmakedefine ARGV_BINARY "@ARGV_BINARY@"
-#cmakedefine ARGV_BINARY_LAUNCH "@ARGV_BINARY_LAUNCH@"
+#cmakedefine ARGV "@ARGV@"
+#cmakedefine ARGV_LAUNCH "@ARGV_LAUNCH@"

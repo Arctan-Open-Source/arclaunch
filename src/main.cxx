@@ -9,14 +9,8 @@ int main(int argc, char** argv) {
   }
   try {
     // Create the context and register the necessary node types
-    arclaunch::NodeContext ctx;
-    arclaunch::notify<arclaunch::FileNode, file_t>(ctx);
-    arclaunch::notify<arclaunch::ExecutableNode, executable_t>(ctx);
-    arclaunch::notify<arclaunch::ScriptNode, script_t>(ctx);
-    arclaunch::notify<arclaunch::LaunchNode, launch_t>(ctx);
-    
     std::unique_ptr<launch_t> file(launch(argv[1]));
-    arclaunch::Node* elem = &ctx.execute(*file);
+    arclaunch::Node* elem = &arclaunch::context().execute(*file);
     elem->startup();
     elem->waitFor();
   }
