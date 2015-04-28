@@ -2,6 +2,7 @@
 find_package(Perl)
 if(PERL_FOUND)
   message(STATUS "Creating Perl tests")
+  add_subdirectory(stdout)
   add_subdirectory(argv)
   add_subdirectory(env)
 else(PERL_FOUND)
