@@ -16,8 +16,10 @@ ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
   int stdoutPipes[2];
   int stderrPipes[2];
   // create the necessary pipes
-  if(pipe(stdoutPipes) || 
-    pipe(stderrPipes)) {
+  // set close-on-exec so that the desciptors aren't open
+  // in the child process
+  if(pipe2(stdoutPipes, O_CLOEXEC) || 
+    pipe2(stderrPipes, O_CLOEXEC)) {
     // TODO: throw a more descriptive exception
     // Failed to open pipes
     throw std::exception();

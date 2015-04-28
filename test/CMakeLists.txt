@@ -5,6 +5,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/reso
 set(ARGV_CXX_FILE ${CMAKE_CURRENT_SOURCE_DIR}/argv.cxx)
 set(ENV_CXX_FILE ${CMAKE_CURRENT_SOURCE_DIR}/env.cxx)
 set(STDOUT_CXX_FILE ${CMAKE_CURRENT_SOURCE_DIR}/stdout.cxx)
+set(STDIN_CXX_FILE ${CMAKE_CURRENT_SOURCE_DIR}/stdin.cxx)
 
 # 
 function(TEST_TEMPLATE TEMPLATE_NAME TEST_NAME LAUNCH_FILE)
@@ -43,6 +44,10 @@ endfunction(ADD_ARGV_TEST)
 function(ADD_ENV_TEST TEST_NAME LAUNCH_FILE)
   TEST_TEMPLATE(env ${TEST_NAME} ${LAUNCH_FILE})
 endfunction(ADD_ENV_TEST)
+
+function(ADD_STDIN_TEST TEST_NAME LAUNCH_FILE)
+  TEST_TEMPLATE(stdin ${TEST_NAME} ${LAUNCH_FILE})
+endfunction(ADD_STDIN_TEST)
 
 # Test for runnning binaries
 add_subdirectory(binary)
