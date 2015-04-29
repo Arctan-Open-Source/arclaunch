@@ -49,9 +49,9 @@
     </xsd:annotation>
 
     <!-- stdin of a program or write to a file -->
-    <xsd:attribute name="in" type="xsd:string" />
+    <xsd:attribute name="from" type="xsd:string" use="required" />
     <!-- stdout of a program or read from a file -->
-    <xsd:attribute name="out" type="xsd:string" />
+    <xsd:attribute name="to" type="xsd:string" use="required" />
   </xsd:complexType>
 
   <xsd:complexType name="env_t">
@@ -227,13 +227,13 @@
       <xsd:selector xpath="node" />
       <xsd:field xpath="@name" />
     </xsd:key>
-    <xsd:keyref name="input_destinations" refer="nodes">
+    <xsd:keyref name="std_source" refer="nodes">
       <xsd:selector xpath="linkage" />
-      <xsd:field xpath="@in" />
+      <xsd:field xpath="@from" />
     </xsd:keyref>
-    <xsd:keyref name="output_sources" refer="nodes">
+    <xsd:keyref name="std_sink" refer="nodes">
       <xsd:selector xpath="linkage" />
-      <xsd:field xpath="@out" />
+      <xsd:field xpath="@to" />
     </xsd:keyref>
   </xsd:element>
   

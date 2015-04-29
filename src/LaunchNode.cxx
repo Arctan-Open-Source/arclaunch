@@ -22,9 +22,11 @@ LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) {
   }
   // Construct a "linkage map"
   for(launch_t::linkage_const_iterator it = launchElem.linkage().begin();
-    it < launchElem.linkage().end(); it++) {
-    // TODO: implement linkages
-    // Can only link files and programs in the same level
+    it < launchElem.linkage().end(); ++it) {
+    // Can only link files and programs from the same launch node
+    Node* from = nodes[it->from()];
+    Node* to = nodes[it->to()];
+    to->linkStdin(from->getStdout());
   }
 }
 

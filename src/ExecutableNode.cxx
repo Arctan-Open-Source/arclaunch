@@ -52,8 +52,6 @@ void ExecutableNode::startup() {
   envList.push_back(NULL);
   if((pid = fork()) == 0) {
     // close the pipes you don't use in the forked process
-    close(outFdRead);
-    close(errFdRead);
     if(inFd && dup2(inFd, STDIN_FILENO)) {
       const char* err = "Failed to overwrite standard in\n";
       write(STDERR_FILENO, err, 32);
@@ -67,15 +65,11 @@ void ExecutableNode::startup() {
       write(STDERR_FILENO, err, 39);
       exit(EXIT_FAILURE);
     }
-    // close the now superfluous outFdWrite
-    close(outFdWrite);
     if((nderr = dup2(errFdWrite, STDERR_FILENO)) == -1) {
       const char* err = "Failed to overwrite standard err pipe\n";
       write(STDERR_FILENO, err, 39);
       exit(EXIT_FAILURE);
     }
-    // close the now superfluous errFdWrite
-    close(errFdWrite);
     // forked thread
     // Deduce the proper path
     for(executable_t::path_iterator it = pathSeq.begin(); 
@@ -100,6 +94,7 @@ void ExecutableNode::startup() {
     // Failed to fork
     throw std::exception();
   }
+  // close the write end of the out and error pipes
   close(outFdWrite);
   close(errFdWrite);
 }
