@@ -1,2 +1,2 @@
-add_executable(from.c from)
-add_executable(to.c to)
+add_executable(from from.c)
+add_executable(to to.c)

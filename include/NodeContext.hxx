@@ -1,5 +1,6 @@
 #include "Node.hxx"
 #include "NodeStorage.hxx"
+#include <list>
 
 #ifndef _NODE_CONTEXT_HXX_
 #define _NODE_CONTEXT_HXX_
@@ -24,7 +25,14 @@ void notify(NodeContext& ctx) {
   // Create a local class
   class Storage : public NodeStorage {
   private:
-    std::vector<Derived> nodes;
+    // Need to use a "list" instead of "vector" to prevent reallocation
+    // Could use forward list or some other container since access past use of emplace_back and destruction isn't really necessary
+    // Cleaning up finished nodes
+    // TODO: clean up finished nodes by some mechanism
+    // TODO: a reference counting pointer might be an okay mechanism in this case
+    // TODO: a pointer-wrapper object could be used to track that
+    // TODO: this centralized storage would not even be necessary with good garbage collection
+    std::list<Derived> nodes;
   public:
     virtual ~Storage() {};
     Node* construct(NodeContext& ctx, const file_t& gNode) {

@@ -18,10 +18,13 @@ protected:
 
 void NodeTest::SetUp() {
   linkage_file = launch(LINKAGE_LAUNCH);
-  elem = dynamic_cast<arclaunch::LaunchNode*>(&arclaunch::context().execute(*linkage_file));
+  arclaunch::Node* node = &arclaunch::context().execute(*linkage_file);
+  elem = dynamic_cast<arclaunch::LaunchNode*>(node);
   ASSERT_TRUE(NULL != elem);
   subElemA = &elem->getNode("from");
   subElemB = &elem->getNode("to");
+  ASSERT_TRUE(NULL != subElemA);
+  ASSERT_TRUE(NULL != subElemB);
   // Start the processes
   elem->startup();
 }

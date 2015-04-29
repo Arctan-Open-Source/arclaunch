@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv) {
   const char* msg;
-  msg = "TEST LINKAGE";
+  msg = "LINKAGE TEST";
   write(STDOUT_FILENO, msg, strlen(msg));
   // Write to stdout
   return 0;

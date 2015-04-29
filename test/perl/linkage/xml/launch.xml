@@ -13,7 +13,7 @@
       </path>
     </interpreter>
   </node>
-  <node name="to">
+  <node name="to" xsi:type="script_t">
     <path os="linux" absolute="false">
       <directory>scripts</directory>
       <directory>to.pl</directory>
@@ -26,4 +26,5 @@
       </path>
     </interpreter>
   </node>
+  <linkage from="from" to="to" />
 </launch>
