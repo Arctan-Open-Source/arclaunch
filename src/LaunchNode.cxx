@@ -10,8 +10,7 @@ LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) {
   // Emplace nodes based on the launch element's children
   for(launch_t::node_const_iterator it = launchElem.node().begin(); 
     it != launchElem.node().end(); it++) {
-    file_t cc = *it;
-    file_t* oc = &cc;
+    const node_t* oc = &(*it);
     Node* points = &ctx.execute(*it);
     if(points)
       nodes[it->name()] = points;

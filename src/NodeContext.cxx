@@ -8,7 +8,7 @@ void NodeContext::recognize(NodeStorage& store) {
 }
 
 // Assumes that notifications about the least specific elements are submitted first
-Node& NodeContext::execute(const file_t& elem) {
+Node& NodeContext::execute(const node_t& elem) {
   Node* node;
   for(std::vector<NodeStorage*>::reverse_iterator it = storages.rbegin();
     it != storages.rend(); it++)

@@ -16,7 +16,7 @@ public:
   // Registers a type of node storage
   void recognize(NodeStorage& store);
   // Executes a node based on its dynamic type
-  Node& execute(const file_t& executableElem);
+  Node& execute(const node_t& executableElem);
 };
 
 // Use a templatized notify function
@@ -35,7 +35,7 @@ void notify(NodeContext& ctx) {
     std::list<Derived> nodes;
   public:
     virtual ~Storage() {};
-    Node* construct(NodeContext& ctx, const file_t& gNode) {
+    Node* construct(NodeContext& ctx, const node_t& gNode) {
       if(const Contained* sNode = dynamic_cast<const Contained*>(&gNode)) {
         nodes.emplace_back(ctx, *sNode);
         return &nodes.back();

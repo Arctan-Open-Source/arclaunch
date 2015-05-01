@@ -112,6 +112,15 @@
     </xsd:attribute>
   </xsd:complexType>
 
+  <xsd:complexType name="node_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        The base type for nodes
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="name" type="xsd:string" use="required" />
+  </xsd:complexType>
+
   <xsd:complexType name="file_t">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
@@ -130,8 +139,8 @@
         </xsd:annotation>
       </xsd:element>
     </xsd:sequence>
-    <xsd:attribute name="name" type="xsd:string" use="required" />
   </xsd:complexType>
+
   
   <xsd:complexType name="executable_t">
     <xsd:annotation>
@@ -166,38 +175,6 @@
     </xsd:complexContent>
   </xsd:complexType>
 
-  <xsd:complexType name="launch_t">
-    <xsd:annotation>
-      <xsd:documentation xml:lang="en">
-        The base element of a launch file
-        Paths of sub-executables will be resolved relative to the path provided for this element
-        If the path resolves to a launch file, the launch file will be used and the further contents of this element ignored
-      </xsd:documentation>
-    </xsd:annotation>
-    
-    <xsd:complexContent>
-      <!-- Absolutely requires use of xsi:type in order to function correctly -->
-      <xsd:extension base="executable_t">
-        <xsd:sequence>
-          <xsd:element name="node" type="file_t" minOccurs="0" maxOccurs="unbounded">
-            <xsd:annotation>
-              <xsd:documentation xml:lang="en">
-                An executable that is started up
-              </xsd:documentation>
-            </xsd:annotation>
-          </xsd:element>
-          <xsd:element name="linkage" type="linkage_t" minOccurs="0" maxOccurs="unbounded">
-            <xsd:annotation>
-              <xsd:documentation xml:lang="en">
-                Used to redirect standard pipes between executables
-              </xsd:documentation>
-            </xsd:annotation>
-          </xsd:element>
-        </xsd:sequence>
-      </xsd:extension>
-    </xsd:complexContent>
-  </xsd:complexType>
-  
   <xsd:complexType name="script_t">
     <xsd:complexContent>
       <xsd:extension base="executable_t">
@@ -207,6 +184,52 @@
               <xsd:documentation xml:lang="en">
                 The executable details of the interpreter used for the script.
                 Requires exactly one, use path details on the executable to vary interpreter by OS
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="group_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        A group is a set of nodes the behavior of a group varies based on it's subtype
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:complexContent>
+      <xsd:extension base="node_t">
+        <xsd:sequence>
+          <xsd:element name="node" type="node_t" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                An executable that is started up
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="launch_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        The base element of a launch file
+        This is a group node that can
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:complexContent>
+      <!-- Absolutely requires use of xsi:type in order to function correctly -->
+      <xsd:extension base="group_t">
+        <xsd:sequence>
+          <xsd:element name="linkage" type="linkage_t" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                Used to redirect standard pipes between executables
               </xsd:documentation>
             </xsd:annotation>
           </xsd:element>
