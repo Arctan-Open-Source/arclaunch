@@ -1,8 +1,59 @@
 #include "ExecutableNode.hxx"
 #include <sys/wait.h>
 #include <exception>
+#include <errno.h>
 
 namespace arclaunch {
+
+// Error in case of failed pipe opening
+class PipeOpenError : std::exception {
+private:
+  static const char* msg;
+  int num;
+public:
+  PipeOpenError() noexcept;
+  virtual ~PipeOpenError();
+  virtual const char* what() const noexcept;
+};
+
+const char* PipeOpenError::msg("Failed to open pipe");
+
+PipeOpenError::PipeOpenError() noexcept {
+  num = errno;
+}
+
+PipeOpenError::~PipeOpenError() {
+}
+
+const char* PipeOpenError::what() const noexcept {
+  return msg;
+}
+
+// Error in case of failed forking
+class ForkError : std::exception {
+private:
+  static const char* msg;
+  int num;
+public:
+  ForkError() noexcept;
+  virtual ~ForkError();
+  virtual const char* what() const noexcept;
+};
+
+const char* ForkError::msg("Failed to fork process");
+
+ForkError::ForkError() noexcept {
+  num = errno;
+}
+
+ForkError::~ForkError() {
+}
+
+const char* ForkError::what() const noexcept {
+  return msg;
+}
+
+
 // ExecutableNode
 ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
   // 
@@ -20,9 +71,8 @@ ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
   // in the child process
   if(pipe2(stdoutPipes, O_CLOEXEC) || 
     pipe2(stderrPipes, O_CLOEXEC)) {
-    // TODO: throw a more descriptive exception
     // Failed to open pipes
-    throw std::exception();
+    throw PipeOpenError();
   }
   // Store the pipe to reroute stdout
   // read end of pipe
@@ -92,7 +142,7 @@ void ExecutableNode::startup() {
   } else if(pid < 0) {
     // TODO: use a more descriptive exception
     // Failed to fork
-    throw std::exception();
+    throw ForkError();
   }
   // close the write end of the out and error pipes
   close(outFdWrite);

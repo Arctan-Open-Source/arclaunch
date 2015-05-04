@@ -130,15 +130,19 @@
       </xsd:documentation>
     </xsd:annotation>
     
-    <xsd:sequence>
-      <xsd:element name="path" type="path_t" minOccurs="0" maxOccurs="unbounded">
-        <xsd:annotation>
-          <xsd:documentation xml:lang="en">
-            The path to the file
-          </xsd:documentation>
-        </xsd:annotation>
-      </xsd:element>
-    </xsd:sequence>
+    <xsd:complexContent>
+      <xsd:extension base="node_t">
+        <xsd:sequence>
+          <xsd:element name="path" type="path_t" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                The path to the file
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
   </xsd:complexType>
 
   

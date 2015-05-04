@@ -2,7 +2,33 @@
 #include "NodeContext.hxx"
 #include <exception>
 
+#include <iostream>
+
 namespace arclaunch {
+
+// Used when a node fails construction
+class NodeConstructionError : std::exception {
+private:
+  static const char* msg;
+public:
+  NodeConstructionError() noexcept;
+  virtual ~NodeConstructionError();
+  const char* what() const noexcept;
+};
+
+const char* NodeConstructionError::msg("Failed to find proper node constructor");
+
+NodeConstructionError::NodeConstructionError() noexcept {
+}
+
+NodeConstructionError::~NodeConstructionError() {
+}
+
+const char* NodeConstructionError::what() const noexcept {
+  return msg;
+}
+
+
 // LaunchNode
 LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) {
   // open pipes for stdin, stdout, and stderr mapping
@@ -15,8 +41,8 @@ LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) {
     if(points)
       nodes[it->name()] = points;
     else {
-      // TODO throw a more descriptive error
-      throw std::exception();
+      std::cerr << "Failed to find proper node constructor" << std::endl;
+      throw NodeConstructionError();
     }
   }
   launch_t::linkage_const_iterator opening = launchElem.linkage().begin();
