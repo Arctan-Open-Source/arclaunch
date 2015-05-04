@@ -17,7 +17,6 @@ public:
   virtual ~LaunchNode();
   virtual void startup();
   virtual bool isRunning() const;
-  virtual pid_t getPid() const;
   virtual void waitFor() const;
   // Very strange contortions can occur from here
   virtual void linkStdin(int fd);

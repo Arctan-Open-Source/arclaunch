@@ -12,6 +12,8 @@ protected:
   std::unique_ptr<launch_t> stdin_file;
   arclaunch::LaunchNode* elem;
   arclaunch::Node* subElem;
+  int outFd;
+  int errFd;
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -21,9 +23,15 @@ void NodeTest::SetUp() {
   elem = dynamic_cast<arclaunch::LaunchNode*>(&arclaunch::context().execute(*stdin_file));
   ASSERT_TRUE(NULL != elem);
   subElem = &elem->getNode("stdin");
+  outFd = dup(subElem->getStdout());
+  errFd = dup(subElem->getStderr());
+  fcntl(outFd, F_SETFD, FD_CLOEXEC);
+  fcntl(errFd, F_SETFD, FD_CLOEXEC);
 }
 
 void NodeTest::TearDown() {
+  close(outFd);
+  close(errFd);
 }
 
 TEST_F(NodeTest, run_stdin) {
@@ -46,8 +54,8 @@ TEST_F(NodeTest, run_stdin) {
   subElem->waitFor();
   // Ensure that stdin works
   std::string empty("");
-  std::string err(drainFd(subElem->getStderr()));
-  std::string out(drainFd(subElem->getStdout()));
+  std::string err(drainFd(errFd));
+  std::string out(drainFd(outFd));
   EXPECT_EQ(empty, err);
   EXPECT_EQ(xch, out);
 }

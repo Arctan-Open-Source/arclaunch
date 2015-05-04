@@ -12,6 +12,8 @@ protected:
   std::unique_ptr<launch_t> argv_file;
   arclaunch::LaunchNode* elem;
   arclaunch::Node* subElem;
+  int outFd;
+  int errFd;
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -20,11 +22,17 @@ void NodeTest::SetUp() {
   argv_file = launch(ARGV_LAUNCH);
   elem = dynamic_cast<arclaunch::LaunchNode*>(&arclaunch::context().execute(*argv_file));
   ASSERT_TRUE(NULL != elem);
-  elem->startup();
   subElem = &elem->getNode("argv");
+  errFd = dup(subElem->getStderr());
+  outFd = dup(subElem->getStdout());
+  fcntl(outFd, F_SETFD, FD_CLOEXEC);
+  fcntl(errFd, F_SETFD, FD_CLOEXEC);
+  elem->startup();
 }
 
 void NodeTest::TearDown() {
+  close(errFd);
+  close(outFd);
 }
 
 TEST_F(NodeTest, run_argv) {
@@ -34,8 +42,8 @@ TEST_F(NodeTest, run_argv) {
   // Let the process complete
   subElem->waitFor();
   std::string empty("");
-  std::string err(drainFd(subElem->getStderr()));
-  std::string out(drainFd(subElem->getStdout()));
+  std::string err(drainFd(errFd));
+  std::string out(drainFd(outFd));
   EXPECT_EQ(empty, err);
   EXPECT_NE(empty, out);
 }

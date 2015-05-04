@@ -45,9 +45,7 @@ LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) {
       throw NodeConstructionError();
     }
   }
-  launch_t::linkage_const_iterator opening = launchElem.linkage().begin();
-  launch_t::linkage_const_iterator closing = launchElem.linkage().end();
-  // Construct a "linkage map"
+  // Configure linkage between nodes
   for(launch_t::linkage_const_iterator it = launchElem.linkage().begin();
     it < launchElem.linkage().end(); it++) {
     // Can only link files and programs from the same launch node
@@ -59,29 +57,12 @@ LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) {
 LaunchNode::~LaunchNode() {}
 
 void LaunchNode::startup() {
-  // TODO: note that pipe configuration must precede startup
-  // Setup pipes
-  int stdinPipes[2];
-  int stdoutPipes[2];
-  int stderrPipes[2];
-  if(pipe(stdinPipes) ||
-    pipe(stdoutPipes) ||
-    pipe(stderrPipes)) {
-    // TODO: throw a more descriptive error
-    throw std::exception();
-  }
-  // transmitting end of stdin
-  // receiving end of stdout
-  // receiving end of stderr
+  // TODO: configure pipes from the launch node's stdin and stdout
 
   // Start all of the sub-nodes
   for(node_iterator it = nodes.begin(); it != nodes.end(); it++) {
     it->second->startup();
   }
-}
-
-pid_t LaunchNode::getPid() const {
-  return 0;
 }
 
 bool LaunchNode::isRunning() const {
