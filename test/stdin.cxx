@@ -12,8 +12,9 @@ protected:
   std::unique_ptr<launch_t> stdin_file;
   arclaunch::LaunchNode* elem;
   arclaunch::Node* subElem;
-  int outFd;
-  int errFd;
+  int inLink[2];
+  int outLink[2];
+  int errLink[2];
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -23,39 +24,39 @@ void NodeTest::SetUp() {
   elem = dynamic_cast<arclaunch::LaunchNode*>(&arclaunch::context().execute(*stdin_file));
   ASSERT_TRUE(NULL != elem);
   subElem = &elem->getNode("stdin");
-  outFd = dup(subElem->getStdout());
-  errFd = dup(subElem->getStderr());
-  fcntl(outFd, F_SETFD, FD_CLOEXEC);
-  fcntl(errFd, F_SETFD, FD_CLOEXEC);
+  pipe2(inLink, O_CLOEXEC);
+  pipe2(outLink, O_CLOEXEC);
+  pipe2(errLink, O_CLOEXEC);
+  int flags = fcntl(inLink[0], F_GETFL) & 3;
+  flags = fcntl(inLink[0], F_GETFL) & 3;
+  subElem->linkStdin(inLink[0]);
+  subElem->linkStdout(outLink[1]);
+  subElem->linkStderr(errLink[1]);
+  close(inLink[0]);
+  close(outLink[1]);
+  close(errLink[1]);
 }
 
 void NodeTest::TearDown() {
-  close(outFd);
-  close(errFd);
+  close(outLink[0]);
+  close(errLink[0]);
 }
 
 TEST_F(NodeTest, run_stdin) {
-  int p[2];
-  pipe(p);
-  // setup close on exec for the write end
-  fcntl(p[1], F_SETFD, FD_CLOEXEC);
   // The data being sent in
   std::string xch("STDIN TEST");
-  // Set the read end as stdin
-  subElem->linkStdin(p[0]);
   // Start the process
   elem->startup();
-  close(p[0]);
   // Write to stdin
-  ::write(p[1], xch.c_str(), xch.size());
-  // close the remaining end of this end of the pipe
-  close(p[1]);
+  ::write(inLink[1], xch.c_str(), xch.size());
+  // Needs to close so the process can finish
+  close(inLink[1]);
   // Let the process complete
   subElem->waitFor();
   // Ensure that stdin works
   std::string empty("");
-  std::string err(drainFd(errFd));
-  std::string out(drainFd(outFd));
+  std::string err(drainFd(errLink[0]));
+  std::string out(drainFd(outLink[0]));
   EXPECT_EQ(empty, err);
   EXPECT_EQ(xch, out);
 }

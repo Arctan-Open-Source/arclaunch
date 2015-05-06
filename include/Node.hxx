@@ -25,12 +25,15 @@ public:
   virtual void startup() = 0;
   virtual bool isRunning() const = 0;
   virtual void waitFor() const = 0;
-  // Used to link file descriptors to the process that will be forked
+  // Used to pass file descriptors to the process that will be forked
   // Very much low-level action
-  virtual void linkStdin(int fd) = 0;
-  // Retrieves the read fd of the stdout pipe
-  virtual int getStdout() = 0;
-  virtual int getStderr() = 0;
+  virtual void linkFd(int fd, int extFd) = 0;
+  virtual void linkStdin(int fd);
+  virtual void linkStdout(int fd);
+  virtual void linkStderr(int fd);
+  // Useful static methods
+  static bool isReadable(int fd);
+  static bool isWritable(int fd);
   static std::vector<std::vector<char> > argSequenceToArgData(executable_t::arg_sequence& args);
   static std::vector<std::vector<char> > envSequenceToEnvData(executable_t::env_sequence& envs);
   static executable_t::arg_sequence fuseArgSequence(executable_t::arg_sequence& args1, executable_t::arg_sequence& args2);

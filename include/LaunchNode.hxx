@@ -9,9 +9,9 @@ class LaunchNode : public Node {
   typedef std::map<std::string, Node*>::const_iterator const_node_iterator;
 private:
   launch_t* interior;
+protected:
+  launch_t::linkage_sequence links;
   std::map<std::string, Node*> nodes;
-  // file descriptors
-  std::map<std::string, int> files;
 public:
   LaunchNode(NodeContext& ctx, const launch_t& launchElem);
   virtual ~LaunchNode();
@@ -19,9 +19,7 @@ public:
   virtual bool isRunning() const;
   virtual void waitFor() const;
   // Very strange contortions can occur from here
-  virtual void linkStdin(int fd);
-  virtual int getStdout();
-  virtual int getStderr();
+  virtual void linkFd(int fd, int extFd);
   Node& getNode(std::string name);
 };
 

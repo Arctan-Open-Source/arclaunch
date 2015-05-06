@@ -3,14 +3,49 @@
 // TODO: vary by operating system
 // TODO: catch the terminate signal and pass it on to the children
 #include <sys/types.h>
+#include <exception>
 
 namespace arclaunch {
 
 // Node
 Node::~Node() {}
 
-// Templatize these? Use functional features of C++11?
+void Node::linkStdin(int fd) {
+  // check that the descriptor is readable
+  if(isReadable(fd))
+    linkFd(STDIN_FILENO, fd);
+  else
+    throw std::exception();
+}
 
+void Node::linkStdout(int fd) {
+  // check that the descriptor is writable
+  if(isWritable(fd))
+    linkFd(STDOUT_FILENO, fd);
+  else
+    throw std::exception();
+}
+
+void Node::linkStderr(int fd) {
+  // check that the descriptor is writable
+  if(isWritable(fd))
+    linkFd(STDERR_FILENO, fd);
+  else
+    throw std::exception();
+}
+
+// Static methods of Node
+bool Node::isReadable(int fd) {
+  int fileFlags = fcntl(fd, F_GETFL) & (O_RDONLY | O_WRONLY | O_RDWR);
+  return fileFlags == O_RDONLY || fileFlags == O_RDWR;
+}
+
+bool Node::isWritable(int fd) {
+  int fileFlags = fcntl(fd, F_GETFL) & (O_RDONLY | O_WRONLY | O_RDWR);
+  return fileFlags == O_WRONLY || fileFlags == O_RDWR;
+}
+
+// Templatize these? Use functional features of C++11?
 std::vector<std::vector<char> > Node::argSequenceToArgData(executable_t::arg_sequence& args) {
   std::vector<std::vector<char> > argData;
   for(executable_t::arg_iterator it = args.begin();

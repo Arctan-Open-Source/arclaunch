@@ -2,8 +2,6 @@
 #include "NodeContext.hxx"
 #include <exception>
 
-#include <iostream>
-
 namespace arclaunch {
 
 // Used when a node fails construction
@@ -41,28 +39,35 @@ LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) {
     if(points)
       nodes[it->name()] = points;
     else {
-      std::cerr << "Failed to find proper node constructor" << std::endl;
       throw NodeConstructionError();
     }
   }
-  // Configure linkage between nodes
-  for(launch_t::linkage_const_iterator it = launchElem.linkage().begin();
-    it < launchElem.linkage().end(); it++) {
-    // Can only link files and programs from the same launch node
-    int fd = getNode(it->from()).getStdout();
-    getNode(it->to()).linkStdin(fd);
-  }
+  // copy the linkage information from the launch element
+  links = launchElem.linkage();
 }
 
 LaunchNode::~LaunchNode() {}
 
 void LaunchNode::startup() {
-  // TODO: configure pipes from the launch node's stdin and stdout
+  // Starting up repeatedly without issue should now be possible
+  
+  // Configure linkage between nodes
+  for(launch_t::linkage_const_iterator it = links.begin();
+    it < links.end(); it++) {
+    // Can only link files and programs from the same launch node
+    int link[2];
+    pipe2(link, O_CLOEXEC);
+    getNode(it->from()).linkStdout(link[1]);
+    getNode(it->to()).linkStdin(link[0]);
+    close(link[0]);
+    close(link[1]);
+  }
 
   // Start all of the sub-nodes
   for(node_iterator it = nodes.begin(); it != nodes.end(); it++) {
     it->second->startup();
   }
+  // linkage is cleared by startup
 }
 
 bool LaunchNode::isRunning() const {
@@ -80,18 +85,9 @@ void LaunchNode::waitFor() const {
   }
 }
 
-void LaunchNode::linkStdin(int fd) {
-  // TODO: setup a working connection
-}
-
-int LaunchNode::getStdout() {
-  // TODO: setup stdout aggregation
-  return 0;
-}
-
-int LaunchNode::getStderr() {
-  // TODO: setup stderr aggregation
-  return 0;
+void LaunchNode::linkFd(int fd, int extFd) {
+  // TODO: implement in a reasonable manner
+  return;
 }
 
 Node& LaunchNode::getNode(std::string name) {

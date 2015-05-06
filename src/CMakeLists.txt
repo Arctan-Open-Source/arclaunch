@@ -13,6 +13,7 @@ add_library(arclaunch
   ExecutableNode.cxx
   ScriptNode.cxx
   LaunchNode.cxx
+  SocketNode.cxx
   )
 
 target_link_libraries(arclaunch 

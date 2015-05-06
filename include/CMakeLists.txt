@@ -9,6 +9,7 @@ install(
     ExecutableNode.hxx
     ScriptNode.hxx
     LaunchNode.hxx
+    SocketNode.hxx
   DESTINATION
     ${CMAKE_INSTALL_PREFIX}/include
     )

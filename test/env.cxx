@@ -12,8 +12,8 @@ protected:
   std::unique_ptr<launch_t> env_file;
   arclaunch::LaunchNode* elem;
   arclaunch::Node* subElem;
-  int outFd;
-  int errFd;
+  int linkStdout[2];
+  int linkStderr[2];
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -23,15 +23,18 @@ void NodeTest::SetUp() {
   elem = dynamic_cast<arclaunch::LaunchNode*>(&arclaunch::context().execute(*env_file));
   ASSERT_TRUE(NULL != elem);
   subElem = &elem->getNode("env");
-  // needs to dup because the descriptors are closed on startup
-  outFd = dup(subElem->getStdout());
-  errFd = dup(subElem->getStderr());
-  fcntl(outFd, F_SETFD, FD_CLOEXEC);
-  fcntl(errFd, F_SETFD, FD_CLOEXEC);
+  pipe2(linkStdout, O_CLOEXEC);
+  pipe2(linkStderr, O_CLOEXEC);
+  subElem->linkStdout(linkStdout[1]);
+  subElem->linkStderr(linkStderr[1]);
   elem->startup();
+  close(linkStdout[1]);
+  close(linkStderr[1]);
 }
 
 void NodeTest::TearDown() {
+  close(linkStdout[0]);
+  close(linkStderr[0]);
 }
 
 TEST_F(NodeTest, run_env) {
@@ -42,11 +45,9 @@ TEST_F(NodeTest, run_env) {
   subElem->waitFor();
   // Ensure that nothing is read from stderr
   std::string empty("");
-  std::string err(drainFd(errFd));
+  std::string err(drainFd(linkStderr[0]));
   EXPECT_EQ(empty, err);
   // Ensure that something is read from stdout
-  std::string out(drainFd(outFd));
+  std::string out(drainFd(linkStdout[0]));
   EXPECT_EQ("test environment variable", out);
-  close(outFd);
-  close(errFd);
 }

@@ -12,10 +12,8 @@ protected:
   std::unique_ptr<launch_t> linkage_file;
   arclaunch::LaunchNode* elem;
   arclaunch::Node *subElemA, *subElemB;
-  int outFdA;
-  int errFdA;
-  int outFdB;
-  int errFdB;
+  int outLinkB[2];
+  int errLinkB[2];
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -29,36 +27,33 @@ void NodeTest::SetUp() {
   subElemB = &elem->getNode("to");
   ASSERT_TRUE(NULL != subElemA);
   ASSERT_TRUE(NULL != subElemB);
-  outFdA = dup(subElemA->getStdout());
-  errFdA = dup(subElemA->getStderr());
-  outFdB = dup(subElemB->getStdout());
-  errFdB = dup(subElemB->getStderr());
-  fcntl(outFdA, F_SETFD, FD_CLOEXEC);
-  fcntl(errFdA, F_SETFD, FD_CLOEXEC);
-  fcntl(outFdB, F_SETFD, FD_CLOEXEC);
-  fcntl(errFdB, F_SETFD, FD_CLOEXEC);
+  pipe2(outLinkB, O_CLOEXEC);
+  pipe2(errLinkB, O_CLOEXEC);
+  subElemB->linkStdout(outLinkB[1]);
+  subElemB->linkStderr(errLinkB[1]);
+  close(outLinkB[1]);
+  close(errLinkB[1]);
   // Start the processes
   elem->startup();
 }
 
 void NodeTest::TearDown() {
-  close(outFdA);
-  close(errFdA);
-  close(outFdB);
-  close(errFdB);
+  close(outLinkB[0]);
+  close(errLinkB[0]);
 }
 
 TEST_F(NodeTest, run_linkage) {
+  // Let one process complete
+  subElemA->waitFor();
+  std::cout << "subElemA completes" << std::endl;
+  subElemB->waitFor();
+  std::cout << "subElemB completes" << std::endl;
   // Let the processes complete
-  elem->waitFor();
+  // elem->waitFor();
   // Ensure that stdin works
   std::string empty("");
-  std::string errA(drainFd(errFdA));
-  std::string outA(drainFd(outFdA));
-  std::string errB(drainFd(errFdB));
-  std::string outB(drainFd(outFdB));
-  EXPECT_EQ(empty, errA);
-  EXPECT_EQ(empty, errB);
-  EXPECT_EQ(empty, outA);
+  std::string outB(drainFd(outLinkB[0]));
+  std::string errB(drainFd(errLinkB[0]));
   EXPECT_EQ("LINKAGE TEST", outB);
+  EXPECT_EQ(empty, errB);
 }

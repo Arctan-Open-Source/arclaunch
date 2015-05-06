@@ -26,20 +26,10 @@ int FileNode::getPid() const {
 void FileNode::waitFor() const {
 }
 
-// Connect to append to a file
-void FileNode::linkStdin(int fd) {
-  // TODO implement to connect to a file
-}
-
-// 
-int FileNode::getStdout() {
-  // TODO return an output file descriptor
-  return 0;
-}
-
-int FileNode::getStderr() {
-  // TODO determine a better way to handle this
-  return 0;
+// Can only connect STDIN and STDOUT meaningfully
+void FileNode::linkFd(int fd, int extFd) {
+  // TODO implement meaningfully
+  return;
 }
 
 }

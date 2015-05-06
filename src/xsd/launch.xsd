@@ -241,6 +241,32 @@
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>
+
+  <xsd:complexType name="socket_node_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        A type derived from a launch file that accepts incoming connections
+        Whenever a connection is accepted the contained nodes are started up
+        In this manner there can be many copies of the nodes created
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="launch_t">
+        <xsd:sequence>
+          <xsd:element name="socket" type="linkage_t" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                Used to redirect sockets as standard pipes
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
+        </xsd:sequence>
+        <!-- TODO adjust for full address description -->
+        <xsd:attribute name="address" type="xsd:string" use="required" />
+        <xsd:attribute name="port" type="xsd:positiveInteger" use="required" />
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
   
   <xsd:element name="launch" type="launch_t">
     <xsd:annotation>
