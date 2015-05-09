@@ -262,8 +262,11 @@
           </xsd:element>
         </xsd:sequence>
         <!-- TODO adjust for full address description -->
+        <!-- Using service uses internal DNS instead of the provided values -->
+        <xsd:attribute name="service" type="xsd:string" use="optional" />
+        <!-- Uses an ephemeral port or the port given by the service if port is not specified -->
+        <xsd:attribute name="port" type="xsd:positiveInteger" use="optional" />
         <xsd:attribute name="address" type="xsd:string" use="required" />
-        <xsd:attribute name="port" type="xsd:positiveInteger" use="required" />
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>

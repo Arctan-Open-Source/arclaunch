@@ -1,5 +1,4 @@
 #include "ScriptNode.hxx"
-#include "NodeContext.hxx"
 
 namespace arclaunch {
 // ScriptNode
