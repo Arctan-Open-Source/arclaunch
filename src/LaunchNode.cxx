@@ -79,7 +79,7 @@ bool LaunchNode::isRunning() const {
   return false;
 }
 
-void LaunchNode::waitFor() const {
+void LaunchNode::waitFor() {
   for(const_node_iterator it = nodes.begin(); it != nodes.end(); it++) {
     it->second->waitFor();
   }
