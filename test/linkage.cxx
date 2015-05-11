@@ -14,6 +14,7 @@ protected:
   arclaunch::Node *subElemA, *subElemB;
   int outLinkB[2];
   int errLinkB[2];
+  void connectPipes();
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -22,19 +23,9 @@ void NodeTest::SetUp() {
   linkage_file = launch(LINKAGE_LAUNCH);
   arclaunch::Node* node = &arclaunch::context().execute(*linkage_file);
   elem = dynamic_cast<arclaunch::LaunchNode*>(node);
-  ASSERT_TRUE(NULL != elem);
   subElemA = &elem->getNode("from");
   subElemB = &elem->getNode("to");
-  ASSERT_TRUE(NULL != subElemA);
-  ASSERT_TRUE(NULL != subElemB);
-  pipe2(outLinkB, O_CLOEXEC);
-  pipe2(errLinkB, O_CLOEXEC);
-  subElemB->linkStdout(outLinkB[1]);
-  subElemB->linkStderr(errLinkB[1]);
-  close(outLinkB[1]);
-  close(errLinkB[1]);
   // Start the processes
-  elem->startup();
 }
 
 void NodeTest::TearDown() {
@@ -42,18 +33,32 @@ void NodeTest::TearDown() {
   close(errLinkB[0]);
 }
 
+void NodeTest::connectPipes() {
+  pipe2(outLinkB, O_CLOEXEC);
+  pipe2(errLinkB, O_CLOEXEC);
+  subElemB->linkStdout(outLinkB[1]);
+  subElemB->linkStderr(errLinkB[1]);
+  close(outLinkB[1]);
+  close(errLinkB[1]);
+}
+
 TEST_F(NodeTest, run_linkage) {
-  // Let one process complete
-  subElemA->waitFor();
-  std::cout << "subElemA completes" << std::endl;
-  subElemB->waitFor();
-  std::cout << "subElemB completes" << std::endl;
-  // Let the processes complete
-  // elem->waitFor();
-  // Ensure that stdin works
   std::string empty("");
+  // 
+  connectPipes();
+  elem->startup();
+  elem->waitFor();
+  // Ensure that stdin works
   std::string outB(drainFd(outLinkB[0]));
   std::string errB(drainFd(errLinkB[0]));
+  EXPECT_EQ("LINKAGE TEST", outB);
+  EXPECT_EQ(empty, errB);
+  // repeat
+  connectPipes();
+  elem->startup();
+  elem->waitFor();
+  outB = drainFd(outLinkB[0]);
+  errB = drainFd(errLinkB[0]);
   EXPECT_EQ("LINKAGE TEST", outB);
   EXPECT_EQ(empty, errB);
 }
