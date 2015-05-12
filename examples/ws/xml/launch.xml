@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<launch xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchema="http://matt5sean3.com/launch.xsd">
+  <!-- Sets up a websocket server on port 8032 -->
+  <!-- The application overall is meant to facilitate exchange of information for WebRTC -->
+  <node name="player" xsi:type="socket_node_t" address="localhost" port="8032">
+    
+    <!-- Uses a compiled C program for packet decoding -->
+    <node name="decode" xsi:type="executable_t">
+      <path os="linux" absolute="false">
+        <directory>build</directory>
+        <directory>src</directory>
+        <directory>decode</directory>
+      </path>
+    </node>
+    
+    <!-- Uses a python script for handling user logic -->
+    <node name="logic" xsi:type="script_t">
+      <path os="linux" absolute="false">
+        <directory>scripts</directory>
+        <directory>logic.py</directory>
+      </path>
+      <interpreter name="python_interpreter">
+        <path os="linux" absolute="true">
+          <directory>usr</directory>
+          <directory>bin</directory>
+          <directory>python</directory>
+        </path>
+      </interpreter>
+    </node>
+    
+    <!-- Uses a compiled C program for packet encoding-->
+    <node name="encode" xsi:type="executable_t">
+      <path os="linux" absolute="false">
+        <directory>build</directory>
+        <directory>src</directory>
+        <directory>encode</directory>
+      </path>
+    </node>
+    <linkage from="decode" to="logic" />
+    <linkage from="logic" to="encode" />
+    <socket from="socket" to="decode" />
+    <socket from="encode" to="socket" />
+  </node>
+  
+  <!-- Global logic is maintained by a perl script -->
+  <node name="world" xsi:type="script_t">
+    <path os="linux" absolute="false">
+      <directory>scripts</directory>
+      <directory>world.pl</directory>
+    </path>
+    <interpreter name="perl_interpreter">
+      <path os="linux" absolute="true">
+        <directory>usr</directory>
+        <directory>bin</directory>
+        <directory>perl</directory>
+      </path>
+    </interpreter>
+  </node>
+  <linkage from="world" to="player" />
+  <linkage from="player" to="world" />
+</launch>
