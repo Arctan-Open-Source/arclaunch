@@ -68,6 +68,7 @@ void LaunchNode::startup() {
     it->second->startup();
   }
   // linkage is cleared by startup
+  closeFds();
 }
 
 bool LaunchNode::isRunning() const {
@@ -83,11 +84,6 @@ void LaunchNode::waitFor() {
   for(const_node_iterator it = nodes.begin(); it != nodes.end(); it++) {
     it->second->waitFor();
   }
-}
-
-void LaunchNode::linkFd(int fd, int extFd) {
-  // TODO: implement in a reasonable manner
-  return;
 }
 
 Node& LaunchNode::getNode(std::string name) {

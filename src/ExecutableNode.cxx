@@ -5,32 +5,6 @@
 
 namespace arclaunch {
 
-// Error in case of failed pipe opening
-/*
-class PipeOpenError : std::exception {
-private:
-  static const char* msg;
-  int num;
-public:
-  PipeOpenError() noexcept;
-  virtual ~PipeOpenError();
-  virtual const char* what() const noexcept;
-};
-
-const char* PipeOpenError::msg("Failed to open pipe");
-
-PipeOpenError::PipeOpenError() noexcept {
-  num = errno;
-}
-
-PipeOpenError::~PipeOpenError() {
-}
-
-const char* PipeOpenError::what() const noexcept {
-  return msg;
-}
-*/
-
 // Error in case of failed forking
 class ForkError : std::exception {
 private:
@@ -81,13 +55,6 @@ ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
   envSeq = elem.env();
 }
 
-void ExecutableNode::closeFds() {
-  // close and clear the mapped file descriptors
-  for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); it++)
-    close(it->second);
-  fdMap.clear();
-}
-
 // Due to major changes, executable nodes should be reusable
 void ExecutableNode::startup() {
   // construct the argument list
@@ -105,6 +72,7 @@ void ExecutableNode::startup() {
     it != envData.end(); it++)
     envList.emplace_back(it->data());
   envList.push_back(NULL);
+
   if((pid = fork()) == 0) {
     // Map the file descriptors to pass to the forked process
     // Overwrite stdin in the forked process
@@ -167,18 +135,6 @@ void ExecutableNode::waitFor() {
     // TODO: use macros to determine the circumstances of the exit
 }
 
-void ExecutableNode::linkFd(int fd, int extFd) {
-  // TODO: If there is a multithreaded process that forks at the same time this is called, the child process
-  // TODO: may get a non-CLOEXEC copy of the generated file descriptor
-  // TODO: fix this race condition, possibly by use of dup3 or by adding a global lock to this method
-  // duplicate the file descriptor so the file descriptor passed in can be closed and recycled
-  if(fdMap.find(fd) != fdMap.end())
-    close(fdMap[fd]);
-  fdMap[fd] = dup(extFd);
-  // the duplicate still needs to be closed-on-exec to prevent superfluous file descriptors in the child processes
-  fcntl(fd, F_SETFD, FD_CLOEXEC);
-}
-
 void ExecutableNode::appendArguments(const executable_t::arg_sequence& args) {
   argSeq.insert(argSeq.end(), args.begin(), args.end());
 }
@@ -188,8 +144,6 @@ void ExecutableNode::appendEnvironment(const executable_t::env_sequence& envs) {
 }
 
 ExecutableNode::~ExecutableNode() {
-  // Close any unclosed pipe file descriptors
-  closeFds();
 }
 
 }
