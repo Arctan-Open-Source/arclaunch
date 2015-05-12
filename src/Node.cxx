@@ -8,7 +8,24 @@
 namespace arclaunch {
 
 // Node
-Node::~Node() {}
+Node::~Node() {
+  // close any unclosed file descriptors
+  closeFds();
+}
+
+void Node::closeFds() {
+  for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); it++)
+    close(it->second);
+  fdMap.clear();
+}
+
+void Node::linkFd(int fd, int extFd) {
+  // TODO: fix possible race condition for fork occurring between dup and CLOEXEC
+  if(fdMap.find(fd) != fdMap.end())
+    close(fdMap[fd]);
+  fdMap[fd] = dup(extFd);
+  fcntl(fdMap[fd], F_SETFD, FD_CLOEXEC);
+}
 
 void Node::linkStdin(int fd) {
   // check that the descriptor is readable

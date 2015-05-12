@@ -7,11 +7,9 @@ namespace arclaunch {
 class ExecutableNode : public Node {
 private:
   pid_t pid;
-  std::map<int, int> fdMap;
   executable_t::path_sequence pathSeq;
   executable_t::arg_sequence argSeq;
   executable_t::env_sequence envSeq;
-  void closeFds();
 public:
   // During construction file descriptors are created that are used the first time the node is started up
   // 
@@ -24,7 +22,6 @@ public:
   virtual void waitFor() const;
   // The file descriptors given to the process is "dup"ed so that even if the provided descriptor is closed
   // the newly created descriptor will be closed on exec
-  virtual void linkFd(int fd, int extFd);
   virtual void appendArguments(const executable_t::arg_sequence& args);
   virtual void appendEnvironment(const executable_t::env_sequence& env);
 };

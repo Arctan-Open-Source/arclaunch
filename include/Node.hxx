@@ -1,5 +1,6 @@
 
 #include "launch.hxx"
+#include <map>
 
 // Linux/Unix libraries
 // TODO: adjust based on operating system constants
@@ -19,6 +20,9 @@ class NodeContext;
 
 // An interface class for executing node elements
 class Node {
+protected:
+  std::map<int, int> fdMap;
+  void closeFds();
 public:
   virtual ~Node();
   // Used to set the constructed node running
@@ -27,7 +31,7 @@ public:
   virtual void waitFor() const = 0;
   // Used to pass file descriptors to the process that will be forked
   // Very much low-level action
-  virtual void linkFd(int fd, int extFd) = 0;
+  virtual void linkFd(int fd, int extFd);
   virtual void linkStdin(int fd);
   virtual void linkStdout(int fd);
   virtual void linkStderr(int fd);
