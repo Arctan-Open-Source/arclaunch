@@ -23,7 +23,7 @@ int FileNode::getPid() const {
 }
 
 // Nothing to wait for
-void FileNode::waitFor() const {
+void FileNode::waitFor() {
 }
 
 // Can only connect STDIN and STDOUT meaningfully

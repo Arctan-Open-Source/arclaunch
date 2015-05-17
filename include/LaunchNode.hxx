@@ -17,7 +17,8 @@ public:
   virtual ~LaunchNode();
   virtual void startup();
   virtual bool isRunning() const;
-  virtual void waitFor() const;
+  virtual void waitFor();
+  // Very strange contortions can occur from here
   Node& getNode(std::string name);
 };
 

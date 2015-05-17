@@ -128,7 +128,7 @@ pid_t ExecutableNode::getPid() const {
   return pid;
 }
 
-void ExecutableNode::waitFor() const {
+void ExecutableNode::waitFor() {
   int status;
   if(pid != 0)
     waitpid(pid, &status, 0);

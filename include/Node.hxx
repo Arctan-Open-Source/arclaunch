@@ -28,7 +28,7 @@ public:
   // Used to set the constructed node running
   virtual void startup() = 0;
   virtual bool isRunning() const = 0;
-  virtual void waitFor() const = 0;
+  virtual void waitFor() = 0;
   // Used to pass file descriptors to the process that will be forked
   // Very much low-level action
   virtual void linkFd(int fd, int extFd);

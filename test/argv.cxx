@@ -14,6 +14,7 @@ protected:
   arclaunch::Node* subElem;
   int outLink[2];
   int errLink[2];
+  void connectPipes();
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -23,15 +24,6 @@ void NodeTest::SetUp() {
   elem = dynamic_cast<arclaunch::LaunchNode*>(&arclaunch::context().execute(*argv_file));
   ASSERT_TRUE(NULL != elem);
   subElem = &elem->getNode("argv");
-  pipe2(outLink, O_CLOEXEC);
-  pipe2(errLink, O_CLOEXEC);
-  // Pass in the write ends of the pipe
-  subElem->linkStdout(outLink[1]);
-  subElem->linkStderr(errLink[1]);
-  // Close the now unnecessary write descriptors
-  close(outLink[1]);
-  close(errLink[1]);
-  elem->startup();
 }
 
 void NodeTest::TearDown() {
@@ -40,15 +32,45 @@ void NodeTest::TearDown() {
   close(errLink[0]);
 }
 
+void NodeTest::connectPipes() {
+  pipe2(outLink, O_CLOEXEC);
+  pipe2(errLink, O_CLOEXEC);
+  // Pass in the write ends of the pipe
+  subElem->linkStdout(outLink[1]);
+  subElem->linkStderr(errLink[1]);
+  // Close the now unnecessary write descriptors
+  close(outLink[1]);
+  close(errLink[1]);
+}
+
 TEST_F(NodeTest, run_argv) {
-  // The major issue right now is my inability to access subprocesses
-  // The solution is to add subprocess access to the LaunchNode class
-  // Access a subprocess
   // Let the process complete
-  subElem->waitFor();
+  connectPipes();
+  elem->startup();
+  elem->waitFor();
   std::string empty("");
   std::string out(drainFd(outLink[0]));
   std::string err(drainFd(errLink[0]));
+  EXPECT_EQ(empty, err);
+  EXPECT_NE(empty, out);
+}
+
+TEST_F(NodeTest, repeat_argv) {
+  std::string empty("");
+  // Let the process complete
+  connectPipes();
+  elem->startup();
+  elem->waitFor();
+  std::string out(drainFd(outLink[0]));
+  std::string err(drainFd(errLink[0]));
+  EXPECT_EQ(empty, err);
+  EXPECT_NE(empty, out);
+  // repeat everything
+  connectPipes();
+  elem->startup();
+  elem->waitFor();
+  out = drainFd(outLink[0]);
+  err = drainFd(errLink[0]);
   EXPECT_EQ(empty, err);
   EXPECT_NE(empty, out);
 }

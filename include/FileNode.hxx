@@ -13,7 +13,7 @@ public:
   virtual void startup();
   virtual bool isRunning() const;
   virtual pid_t getPid() const;
-  virtual void waitFor() const;
+  virtual void waitFor();
   virtual void linkFd(int fd, int extFd);
 };
 

@@ -14,6 +14,7 @@ protected:
   arclaunch::Node* subElem;
   int outLink[2];
   int errLink[2];
+  void connectPipes();
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -23,13 +24,6 @@ void NodeTest::SetUp() {
   elem = dynamic_cast<arclaunch::LaunchNode*>(&arclaunch::context().execute(*stdout_file));
   ASSERT_TRUE(NULL != elem);
   subElem = &elem->getNode("stdout");
-  pipe2(outLink, O_CLOEXEC);
-  pipe2(errLink, O_CLOEXEC);
-  subElem->linkStdout(outLink[1]);
-  subElem->linkStderr(errLink[1]);
-  close(outLink[1]);
-  close(errLink[1]);
-  elem->startup();
 }
 
 void NodeTest::TearDown() {
@@ -37,13 +31,46 @@ void NodeTest::TearDown() {
   close(errLink[0]);
 }
 
+void NodeTest::connectPipes() {
+  pipe2(outLink, O_CLOEXEC);
+  pipe2(errLink, O_CLOEXEC);
+  subElem->linkStdout(outLink[1]);
+  subElem->linkStderr(errLink[1]);
+  close(outLink[1]);
+  close(errLink[1]);
+}
+
 TEST_F(NodeTest, run_stdout) {
+  connectPipes();
+  elem->startup();
   // Let the process complete
   subElem->waitFor();
   // Ensure that stdout works
   std::string empty("");
   std::string out(drainFd(outLink[0]));
   std::string err(drainFd(errLink[0]));
+  EXPECT_EQ(empty, err);
+  EXPECT_EQ("STDOUT TEST", out);
+}
+
+// Test restarting the launch file
+TEST_F(NodeTest, repeat_stdout) {
+  std::string empty("");
+  // Go through the whole process
+  connectPipes();
+  elem->startup();
+  subElem->waitFor();
+  // Ensure that stdout works
+  std::string out(drainFd(outLink[0]));
+  std::string err(drainFd(errLink[0]));
+  EXPECT_EQ(empty, err);
+  EXPECT_EQ("STDOUT TEST", out);
+  // Repeat the process
+  connectPipes();
+  elem->startup();
+  subElem->waitFor();
+  out = drainFd(outLink[0]);
+  err = drainFd(errLink[0]);
   EXPECT_EQ(empty, err);
   EXPECT_EQ("STDOUT TEST", out);
 }
