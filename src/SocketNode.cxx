@@ -59,9 +59,9 @@ void SocketNode::acceptConnections(Addr* addr) {
     for(socket_node_t::socket_iterator it = seq.begin(); it != seq.end(); ++it) {
       // Configure linkage between the socket and the nodes
       if(it->from() == "socket")
-        getNode(it->to()).linkStdin(sockFd);
+        getNode(it->to()).linkFd(it->from_fd(), sockFd);
       else if(it->to() == "socket")
-        getNode(it->from()).linkStdout(sockFd);
+        getNode(it->from()).linkFd(it->to_fd(), sockFd);
     }
     // Use LaunchNode version of startup
     LaunchNode::startup();

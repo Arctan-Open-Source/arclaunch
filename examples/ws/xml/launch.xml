@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
-<launch xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchema="http://matt5sean3.com/launch.xsd">
+<launch name="ws_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
   <!-- Sets up a websocket server on port 8032 -->
   <!-- The application overall is meant to facilitate exchange of information for WebRTC -->
   <node name="player" xsi:type="socket_node_t" address="localhost" port="8032">
     
-    <!-- Uses a compiled C program for packet decoding -->
-    <node name="decode" xsi:type="executable_t">
+    <!-- Uses a compiled C program for packet encoding and decoding -->
+    <node name="encode_decode" xsi:type="executable_t">
       <path os="linux" absolute="false">
         <directory>build</directory>
         <directory>src</directory>
-        <directory>decode</directory>
+        <directory>encode_decode</directory>
       </path>
     </node>
     
@@ -36,10 +36,13 @@
         <directory>encode</directory>
       </path>
     </node>
-    <linkage from="decode" to="logic" />
-    <linkage from="logic" to="encode" />
-    <socket from="socket" to="decode" />
-    <socket from="encode" to="socket" />
+    <!-- The logic node sends and receives far more simply encoded packets to the encode_decode node -->
+    <!-- The logic node also doesn't have to deal with any of the HTTP header pieces -->
+    <linkage from="encode_decode" to="logic" />
+    <linkage from="logic" to="encode_decode" />
+    <!-- encode_decode is self contained for handling websockets -->
+    <socket from="socket" to="encode_decode" to_fd="3" />
+    <socket from="encode_decode" to="socket" from_fd="4" />
   </node>
   
   <!-- Global logic is maintained by a perl script -->
