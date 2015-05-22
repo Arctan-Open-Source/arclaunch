@@ -1,5 +1,6 @@
 #include "SocketNode.hxx"
 #include <exception>
+#include <sys/select.h>
 
 
 namespace arclaunch {
@@ -42,30 +43,53 @@ SocketNode::~SocketNode() {
 }
 
 void SocketNode::acceptConnections(Addr* addr) {
-  int fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+  // 
+  std::vector<int> fds;
+  Addr* anAddr;
+  anAddr = addr;
+  fd_set read_set;
+  int maxfd = 0;
+  do {
+    int fd;
+    // TODO: SOCK_CLOEXEC is linux specific
+    fd = socket(anAddr->ai_family, anAddr->ai_socktype | SOCK_CLOEXEC, anAddr->ai_protocol);
+    if(fd > maxfd)
+      maxfd = fd;
+    bind(fd, anAddr->ai_addr, anAddr->ai_addrlen);
+    // uses backlog of 20
+    listen(fd, 20);
+    fds.push_back(fd);
+  } while(anAddr = anAddr->ai_next);
+  maxfd++;
   // start accepting connections
-  int sockFd;
-  bind(fd, addr->ai_addr, addr->ai_addrlen);
-  // uses backlog of 20
-  listen(fd, 20);
   // the accepted address
-  sockaddr accAddr;
-  socklen_t addrlen;
+  int numAccSock = 0;
   // close the file descriptor on exec
-  while(keep && (sockFd = accept4(sockFd, &accAddr, &addrlen, SOCK_CLOEXEC))) {
-    // Uses a lock so that different threads won't interfere with each other
-    std::unique_lock<std::mutex> forkLock(forkMtx);
-    // Configure linkage between the socket and the nodes
-    for(socket_node_t::socket_iterator it = seq.begin(); it != seq.end(); ++it) {
+  struct timeval tout = {0, 500};
+  do {
+    for(size_t c = 0; c < fds.size(); c++) {
+      if(numAccSock == 0)
+        break;
+      int accSock = fds[c];
+      if(!FD_ISSET(accSock, &read_set))
+        continue;
+      numAccSock--;
+      sockaddr accAddr;
+      socklen_t addrlen;
+      int sockFd = accept4(accSock, &accAddr, &addrlen, SOCK_CLOEXEC);
       // Configure linkage between the socket and the nodes
-      if(it->from() == "socket")
-        getNode(it->to()).linkFd(it->from_fd(), sockFd);
-      else if(it->to() == "socket")
-        getNode(it->from()).linkFd(it->to_fd(), sockFd);
+      for(socket_node_t::socket_iterator it = seq.begin(); it != seq.end(); ++it) {
+        if(it->from() == "socket")
+          getNode(it->to()).linkFd(it->from_fd(), sockFd);
+        else if(it->to() == "socket")
+          getNode(it->from()).linkFd(it->to_fd(), sockFd);
+      }
+      for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
+        FD_SET(*it, &read_set);
+      // Use LaunchNode version of startup
+      LaunchNode::startup();
     }
-    // Use LaunchNode version of startup
-    LaunchNode::startup();
-  }
+  } while(keep && (numAccSock = select(maxfd, &read_set, NULL, NULL, &tout)));
 }
 
 void SocketNode::startup() {

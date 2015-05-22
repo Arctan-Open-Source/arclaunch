@@ -18,6 +18,7 @@ else()
 endif()
 
 find_package(XSD REQUIRED)
+find_package(Threads REQUIRED)
 
 include_directories(include ${XSD_INCLUDE_DIR} ${CMAKE_BINARY_DIR}/src)
 

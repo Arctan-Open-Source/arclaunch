@@ -18,6 +18,7 @@ add_library(arclaunch
 
 target_link_libraries(arclaunch 
   ${XSD_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
   )
 
 add_executable(launch

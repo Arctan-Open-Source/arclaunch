@@ -1,6 +1,5 @@
 #include "LaunchNode.hxx"
 #include <thread>
-#include <mutex>
 #include <atomic>
 
 #include <sys/types.h>
@@ -24,7 +23,6 @@ private:
   void acceptConnections(Addr* addr);
   // the threads used for accepting connections
   std::vector<std::thread> thrs;
-  std::mutex forkMtx;
   std::atomic<bool> keep;
 public:
   SocketNode(NodeContext& ctx, const socket_node_t& elem);
