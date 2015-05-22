@@ -28,14 +28,6 @@
       </interpreter>
     </node>
     
-    <!-- Uses a compiled C program for packet encoding-->
-    <node name="encode" xsi:type="executable_t">
-      <path os="linux" absolute="false">
-        <directory>build</directory>
-        <directory>src</directory>
-        <directory>encode</directory>
-      </path>
-    </node>
     <!-- The logic node sends and receives far more simply encoded packets to the encode_decode node -->
     <!-- The logic node also doesn't have to deal with any of the HTTP header pieces -->
     <linkage from="encode_decode" to="logic" />
