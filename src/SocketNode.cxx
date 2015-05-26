@@ -2,11 +2,12 @@
 #include <exception>
 #include <sys/select.h>
 
-
 namespace arclaunch {
 
 SocketNode::SocketNode(NodeContext& ctx, const socket_node_t& elem) :
   LaunchNode(ctx, elem) {
+  // The largest numbered accepting socket needs to start at 0
+  maxfd = 0;
   Addr hint;
   // No hint flags
   hint.ai_flags = 0;
@@ -21,9 +22,6 @@ SocketNode::SocketNode(NodeContext& ctx, const socket_node_t& elem) :
   hint.ai_addr = NULL;
   hint.ai_canonname = NULL;
   hint.ai_next = NULL;
-  port = 0; // use ephemeral port unless set
-  if(elem.port().present())
-    port = elem.port().get();
   int err; // error code storage
   // TODO: add limits to the XSD file to limit the acceptable strings for address and service
   // check for standard solutions to this problem in the XSD specification
@@ -34,6 +32,8 @@ SocketNode::SocketNode(NodeContext& ctx, const socket_node_t& elem) :
   
   if(err) {
     // getaddrinfo failed
+    // TODO throw a more descriptive exception
+    throw std::exception();
   }
 }
 
@@ -42,15 +42,14 @@ SocketNode::~SocketNode() {
   freeaddrinfo(res);
 }
 
-void SocketNode::acceptConnections(Addr* addr) {
-  // 
-  std::vector<int> fds;
+// Can be called multiple times to accept on even more linked lists of addresses
+void SocketNode::prepareAccept(Addr* addr) {
   Addr* anAddr;
   anAddr = addr;
-  fd_set read_set;
-  int maxfd = 0;
   do {
     int fd;
+    sockaddr_in* s4;
+    sockaddr_in6* s6;
     // TODO: SOCK_CLOEXEC is linux specific
     fd = socket(anAddr->ai_family, anAddr->ai_socktype | SOCK_CLOEXEC, anAddr->ai_protocol);
     if(fd > maxfd)
@@ -60,7 +59,10 @@ void SocketNode::acceptConnections(Addr* addr) {
     listen(fd, 20);
     fds.push_back(fd);
   } while(anAddr = anAddr->ai_next);
-  maxfd++;
+}
+
+void SocketNode::acceptConnections() {
+  fd_set read_set;
   // start accepting connections
   // the accepted address
   int numAccSock = 0;
@@ -89,21 +91,15 @@ void SocketNode::acceptConnections(Addr* addr) {
       // Use LaunchNode version of startup
       LaunchNode::startup();
     }
-  } while(keep && (numAccSock = select(maxfd, &read_set, NULL, NULL, &tout)));
+  } while(keep && (numAccSock = select(maxfd + 1, &read_set, NULL, NULL, &tout)));
 }
 
 void SocketNode::startup() {
   // Start the accepting sockets
   // Create an accepting socket
-  Addr* accAddr;
-  accAddr = res;
-  do {
-    // address needs to be non-null
-    if(!accAddr->ai_addr)
-      break;
-    // start the thread
-    thrs.emplace_back(&SocketNode::acceptConnections, this, accAddr);
-  } while(accAddr = accAddr->ai_next);
+  prepareAccept(res);
+  // start the thread
+  thrs.emplace_back(&SocketNode::acceptConnections, this);
 }
 
 void SocketNode::waitFor() {

@@ -48,12 +48,56 @@ TEST_F(NodeTest, run_socket) {
   addr4.char_data[3] = 1;
   sockaddr_in addr = {
     AF_INET,
-    8320, // port 8320
+    htons(8320), // port 8320
     {
       addr4.uint32
     }
   };
-  ASSERT_EQ(connect(fd, (sockaddr*) &addr, sizeof(sockaddr_in)), 0);
+  int res = connect(fd, (sockaddr*) &addr, sizeof(sockaddr_in));
+  if(res != 0) {
+    switch(errno) {
+    case EACCES:
+      std::cout << "EACCES" << std::endl;
+      break;
+    case EPERM:
+      std::cout << "EPERM" << std::endl;
+      break;
+    case EADDRINUSE:
+      std::cout << "EADDRINUSE" << std::endl;
+      break;
+    case EAFNOSUPPORT:
+      std::cout << "EAFNOSUPPORT" << std::endl;
+      break;
+    case EAGAIN:
+      std::cout << "EAGAIN" << std::endl;
+      break;
+    case EALREADY:
+      std::cout << "EALREADY" << std::endl;
+      break;
+    case EBADF:
+      std::cout << "EBADF" << std::endl;
+      break;
+    case ECONNREFUSED:
+      std::cout << "ECONNREFUSED" << std::endl;
+      break;
+    case EFAULT:
+      std::cout << "EFAULT" << std::endl;
+      break;
+    case EINPROGRESS:
+      std::cout << "EINPROGRESS" << std::endl;
+      break;
+    case EINTR:
+      std::cout << "EINTR" << std::endl;
+      break;
+    case EISCONN:
+      std::cout << "EISCONN" << std::endl;
+      break;
+    default:
+      std::cout << "default" << std::endl;
+      break;
+    }
+  }
+  ASSERT_EQ(res, 0);
   // The server should echo back
   const char *write_buffer = "Hello World";
   write(fd, write_buffer, strlen(write_buffer));

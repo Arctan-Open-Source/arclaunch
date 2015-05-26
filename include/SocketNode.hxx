@@ -13,14 +13,16 @@
 namespace arclaunch {
 class SocketNode : public LaunchNode {
   typedef struct ::addrinfo Addr;
+  std::vector<int> fds;
+  int maxfd;
 private:
   socket_node_t::socket_sequence seq;
-  unsigned int port;
   int domain;
   int type;
   int protocol;
   addrinfo* res;
-  void acceptConnections(Addr* addr);
+  void prepareAccept(Addr* addr);
+  void acceptConnections();
   // the threads used for accepting connections
   std::vector<std::thread> thrs;
   std::atomic<bool> keep;
