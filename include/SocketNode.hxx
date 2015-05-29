@@ -24,7 +24,7 @@ private:
   void prepareAccept(Addr* addr);
   void acceptConnections();
   // the threads used for accepting connections
-  std::vector<std::thread> thrs;
+  std::thread accThread;
   std::atomic<bool> keep;
 public:
   SocketNode(NodeContext& ctx, const socket_node_t& elem);

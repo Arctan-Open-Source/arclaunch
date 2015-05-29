@@ -23,7 +23,10 @@ void Node::linkFd(int fd, int extFd) {
   // TODO: fix possible race condition for fork occurring between dup and CLOEXEC
   if(fdMap.find(fd) != fdMap.end())
     close(fdMap[fd]);
-  fdMap[fd] = dup(extFd);
+  int nFd = dup(extFd);
+  if(nFd == -1) // TODO throw a more descriptive exception
+    throw std::exception();
+  fdMap[fd] = nFd;
   fcntl(fdMap[fd], F_SETFD, FD_CLOEXEC);
 }
 

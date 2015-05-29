@@ -35,10 +35,13 @@ SocketNode::SocketNode(NodeContext& ctx, const socket_node_t& elem) :
     // TODO throw a more descriptive exception
     throw std::exception();
   }
+  seq = elem.socket();
 }
 
 SocketNode::~SocketNode() {
   waitFor();
+  for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); it++)
+    close(*it);
   freeaddrinfo(res);
 }
 
@@ -69,29 +72,32 @@ void SocketNode::acceptConnections() {
   // close the file descriptor on exec
   struct timeval tout = {0, 500};
   do {
-    for(size_t c = 0; c < fds.size(); c++) {
+    for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); it++) {
       if(numAccSock == 0)
         break;
-      int accSock = fds[c];
+      int accSock = *it;
       if(!FD_ISSET(accSock, &read_set))
         continue;
       numAccSock--;
-      sockaddr accAddr;
-      socklen_t addrlen;
-      int sockFd = accept4(accSock, &accAddr, &addrlen, SOCK_CLOEXEC);
+      int sockFd = accept4(accSock, NULL, NULL, SOCK_CLOEXEC);
+      if(sockFd == -1) // TODO throw a more descriptive exception
+        throw std::exception();
       // Configure linkage between the socket and the nodes
       for(socket_node_t::socket_iterator it = seq.begin(); it != seq.end(); ++it) {
         if(it->from() == "socket")
-          getNode(it->to()).linkFd(it->from_fd(), sockFd);
+          getNode(it->to()).linkFd(it->to_fd(), sockFd);
         else if(it->to() == "socket")
-          getNode(it->from()).linkFd(it->to_fd(), sockFd);
+          getNode(it->from()).linkFd(it->from_fd(), sockFd);
       }
-      for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
-        FD_SET(*it, &read_set);
+      close(sockFd);
       // Use LaunchNode version of startup
       LaunchNode::startup();
     }
-  } while(keep && (numAccSock = select(maxfd + 1, &read_set, NULL, NULL, &tout)));
+    FD_ZERO(&read_set);
+    for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
+      FD_SET(*it, &read_set);
+    numAccSock = select(maxfd + 1, &read_set, NULL, NULL, &tout);
+  } while(keep);
 }
 
 void SocketNode::startup() {
@@ -99,16 +105,15 @@ void SocketNode::startup() {
   // Create an accepting socket
   prepareAccept(res);
   // start the thread
-  thrs.emplace_back(&SocketNode::acceptConnections, this);
+  accThread = std::thread(&SocketNode::acceptConnections, this);
 }
 
 void SocketNode::waitFor() {
   // Setup the threads to stop
   keep = false;
-  // Wait for the threads to stop cleanly
-  for(std::vector<std::thread>::iterator it = thrs.begin(); it != thrs.end(); it++) {
-    it->join();
-  }
+  // wait for the thread to stop cleanly
+  if(accThread.joinable())
+    accThread.join();
 }
 
 }

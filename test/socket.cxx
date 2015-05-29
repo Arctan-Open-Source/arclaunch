@@ -54,54 +54,15 @@ TEST_F(NodeTest, run_socket) {
     }
   };
   int res = connect(fd, (sockaddr*) &addr, sizeof(sockaddr_in));
-  if(res != 0) {
-    switch(errno) {
-    case EACCES:
-      std::cout << "EACCES" << std::endl;
-      break;
-    case EPERM:
-      std::cout << "EPERM" << std::endl;
-      break;
-    case EADDRINUSE:
-      std::cout << "EADDRINUSE" << std::endl;
-      break;
-    case EAFNOSUPPORT:
-      std::cout << "EAFNOSUPPORT" << std::endl;
-      break;
-    case EAGAIN:
-      std::cout << "EAGAIN" << std::endl;
-      break;
-    case EALREADY:
-      std::cout << "EALREADY" << std::endl;
-      break;
-    case EBADF:
-      std::cout << "EBADF" << std::endl;
-      break;
-    case ECONNREFUSED:
-      std::cout << "ECONNREFUSED" << std::endl;
-      break;
-    case EFAULT:
-      std::cout << "EFAULT" << std::endl;
-      break;
-    case EINPROGRESS:
-      std::cout << "EINPROGRESS" << std::endl;
-      break;
-    case EINTR:
-      std::cout << "EINTR" << std::endl;
-      break;
-    case EISCONN:
-      std::cout << "EISCONN" << std::endl;
-      break;
-    default:
-      std::cout << "default" << std::endl;
-      break;
-    }
-  }
   ASSERT_EQ(res, 0);
   // The server should echo back
   const char *write_buffer = "Hello World";
   write(fd, write_buffer, strlen(write_buffer));
   char read_buffer[128];
-  read(fd, read_buffer, strlen(write_buffer));
+  size_t nread = 0;
+  while(nread < strlen(write_buffer))
+    nread += read(fd, read_buffer + nread, strlen(write_buffer) - nread);
+  read_buffer[strlen(write_buffer)] = '\0';
+  EXPECT_STREQ(write_buffer, read_buffer);
   close(fd);
 }
