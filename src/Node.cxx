@@ -15,19 +15,27 @@ Node::~Node() {
 
 void Node::closeFds() {
   for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); it++)
-    close(it->second);
+    close(it->first);
   fdMap.clear();
 }
 
 void Node::linkFd(int fd, int extFd) {
-  // TODO: fix possible race condition for fork occurring between dup and CLOEXEC
-  if(fdMap.find(fd) != fdMap.end())
-    close(fdMap[fd]);
-  int nFd = dup(extFd);
-  if(nFd == -1) // TODO throw a more descriptive exception
-    throw std::exception();
-  fdMap[fd] = nFd;
-  fcntl(fdMap[fd], F_SETFD, FD_CLOEXEC);
+  // fd should be kept small
+  // By ensuring nFd is greater than fd, the mapping will be performed such that nFd is never closed by accident
+  // because each nFd must be greater than the previous, which is greater than the previous fds
+  int nFd = fd + 1;
+  int result = -1;
+  while(result == -1) {
+    // Check that nFd is not currently an open file descriptor
+    if(fcntl(nFd, F_GETFD) != -1 || errno != EBADF) {
+      nFd++;
+      continue;
+    }
+    result = dup3(extFd, nFd, O_CLOEXEC);
+    if(result == -1) // TODO throw a more descriptive exception
+      throw std::exception();
+  }
+  fdMap[nFd] = fd;
 }
 
 void Node::linkStdin(int fd) {

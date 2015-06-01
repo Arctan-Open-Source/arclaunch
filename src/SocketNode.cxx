@@ -62,6 +62,7 @@ void SocketNode::prepareAccept(Addr* addr) {
     listen(fd, 20);
     fds.push_back(fd);
   } while(anAddr = anAddr->ai_next);
+  keep = true;
 }
 
 void SocketNode::acceptConnections() {

@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
-<launch name="env_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
+<launch name="env_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="@LAUNCH_XML_SCHEMA@">
   <node name="env" xsi:type="script_t">
     <path absolute="false" os="linux">
       <directory>scripts</directory>
-      <directory>main.py</directory>
+      <directory>main.pl</directory>
     </path>
     <env key="TEST_ENV" value="test environment variable" />
-    <interpreter name="python_interpreter">
+    <interpreter name="perl_interpreter">
       <path absolute="true" os="linux">
         <directory>usr</directory>
         <directory>bin</directory>
-        <directory>python</directory>
+        <directory>perl</directory>
       </path>
     </interpreter>
   </node>

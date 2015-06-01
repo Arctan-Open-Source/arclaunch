@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<launch name="linkage_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
+<launch name="linkage_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="@LAUNCH_XML_SCHEMA@">
   <node name="from" xsi:type="script_t">
     <path os="linux" absolute="false">
       <directory>scripts</directory>

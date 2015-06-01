@@ -77,12 +77,22 @@ void ExecutableNode::startup() {
     // Map the file descriptors to pass to the forked process
     // Overwrite stdin in the forked process
     for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); it++) {
-      if(dup2(it->second, it->first) != it->first) {
-        const char* err = "Failed to overwrite pipe\n";
-        write(STDERR_FILENO, err, 27);
-        exit(EXIT_FAILURE);
+      if(it->first == it->second) {
+        // irregular case where first is the same as second
+        fcntl(it->first, F_SETFD, 0); // unset FD_CLOEXEC
+      } else if(fdMap.find(it->second) == fdMap.end()) {
+        // standard case
+        if(dup2(it->first, it->second) != it->second) {
+          const char* err = "Failed to overwrite pipe\n";
+          write(STDERR_FILENO, err, 27);
+          exit(EXIT_FAILURE);
+        }
+        close(it->first);
+      } else {
+        // irregular case in which first is already in use by another
+        // Use dup until the problem is resolved
+        // TODO: fix this special case
       }
-      close(it->second);
     }
     // forked thread
     // Deduce the proper path

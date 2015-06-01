@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<launch name="stdout_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
-  <node name="stdout" xsi:type="script_t">
+<launch name="argv_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="@LAUNCH_XML_SCHEMA@">
+  <node name="argv" xsi:type="script_t">
     <path absolute="false" os="linux">
       <directory>scripts</directory>
       <directory>main.py</directory>

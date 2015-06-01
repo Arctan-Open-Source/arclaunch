@@ -4,4 +4,5 @@ file(COPY
   DESTINATION
     ${CMAKE_CURRENT_BINARY_DIR}/scripts)
 
-ADD_STDOUT_TEST("python" "${CMAKE_CURRENT_SOURCE_DIR}/xml/launch.xml")
+configure_file(xml/launch.xml.in ${CMAKE_CURRENT_BINARY_DIR}/xml/launch.xml)
+ADD_STDOUT_TEST("python" "${CMAKE_CURRENT_BINARY_DIR}/xml/launch.xml")
