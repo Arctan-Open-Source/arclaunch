@@ -62,21 +62,21 @@ void ExecutableNode::startup() {
   std::vector<char*> argList;
   argList.push_back(NULL);
   for(std::vector<std::vector<char> >::iterator it = argData.begin(); 
-    it != argData.end(); it++)
+    it != argData.end(); ++it)
     argList.emplace_back(it->data());
   argList.push_back(NULL);
   // construct the environment list
   std::vector<std::vector<char> > envData(envSequenceToEnvData(envSeq));
   std::vector<char*> envList;
   for(std::vector<std::vector<char> >::iterator it = envData.begin();
-    it != envData.end(); it++)
+    it != envData.end(); ++it)
     envList.emplace_back(it->data());
   envList.push_back(NULL);
 
   if((pid = fork()) == 0) {
     // Map the file descriptors to pass to the forked process
     // Overwrite stdin in the forked process
-    for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); it++) {
+    for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); ++it) {
       if(dup2(it->second, it->first) != it->first) {
         const char* err = "Failed to overwrite pipe\n";
         write(STDERR_FILENO, err, 27);
@@ -87,7 +87,7 @@ void ExecutableNode::startup() {
     // forked thread
     // Deduce the proper path
     for(executable_t::path_iterator it = pathSeq.begin(); 
-      it != pathSeq.end(); it++) {
+      it != pathSeq.end(); ++it) {
       // Check if it's the correct OS
       if(*(it->os()) != OS_STRING)
         continue;

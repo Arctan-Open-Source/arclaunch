@@ -4,44 +4,9 @@
 
 namespace arclaunch {
 
-// Used when a node fails construction
-class NodeConstructionError : std::exception {
-private:
-  static const char* msg;
-public:
-  NodeConstructionError() noexcept;
-  virtual ~NodeConstructionError();
-  const char* what() const noexcept;
-};
-
-const char* NodeConstructionError::msg("Failed to find proper node constructor");
-
-NodeConstructionError::NodeConstructionError() noexcept {
-}
-
-NodeConstructionError::~NodeConstructionError() {
-}
-
-const char* NodeConstructionError::what() const noexcept {
-  return msg;
-}
-
-
 // LaunchNode
-LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) {
-  // open pipes for stdin, stdout, and stderr mapping
-  int success;
-  // Emplace nodes based on the launch element's children
-  for(launch_t::node_const_iterator it = launchElem.node().begin(); 
-    it != launchElem.node().end(); it++) {
-    const node_t* oc = &(*it);
-    Node* points = &ctx.execute(*it);
-    if(points)
-      nodes[it->name()] = points;
-    else {
-      throw NodeConstructionError();
-    }
-  }
+LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) :
+  GroupNode(ctx, launchElem) {
   // copy the linkage information from the launch element
   links = launchElem.linkage();
 }
@@ -84,10 +49,6 @@ void LaunchNode::waitFor() {
   for(const_node_iterator it = nodes.begin(); it != nodes.end(); it++) {
     it->second->waitFor();
   }
-}
-
-Node& LaunchNode::getNode(std::string name) {
-  return *nodes[name];
 }
 
 }

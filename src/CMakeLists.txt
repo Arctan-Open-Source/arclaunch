@@ -12,6 +12,7 @@ add_library(arclaunch
   FileNode.cxx
   ExecutableNode.cxx
   ScriptNode.cxx
+  GroupNode.cxx
   LaunchNode.cxx
   SocketNode.cxx
   )

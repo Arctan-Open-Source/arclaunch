@@ -242,6 +242,21 @@
     </xsd:complexContent>
   </xsd:complexType>
 
+  <xsd:complexType name="sequence_node_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        This type of node runs a set of nodes in sequence.
+        The file descriptors connected to these nodes are applied to each node in sequence.
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:complexContent>
+      <xsd:extension base="group_t">
+        <xsd:attribute name="repeats" type="xsd:boolean" default="false" />
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
   <xsd:complexType name="socket_node_t">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
