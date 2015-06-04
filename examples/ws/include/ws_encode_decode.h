@@ -93,21 +93,22 @@ size_t get_ws_header_size(const struct ws_packet* pack);
 char* get_ws_packet_mask(struct ws_packet* pack);
 
 enum WS_ENDPOINT_TYPE {
-  SERVER,
-  CLIENT
+  WS_SERVER,
+  WS_CLIENT
 };
 
+// Uses a pointer to a pointer to allow reallocation
 typedef void (*ws_packet_handler)(const char*, size_t, void**);
 
 struct ws_connection {
   enum WS_ENDPOINT_TYPE endpoint; // whether server or client
-  void *buffer;
   void *tx_data;
   void *rx_data;
+  void *buffer;
   // Functions to abstract receiving and transmitting data
-  // size_t rx(size_t n, void* buffer, void* rx_data)
+  // size_t rx(size_t n, void* buffer, const void* rx_data)
   size_t (*rx)(size_t, void*, const void*);
-  // size_t tx(size_t n, void* buffer, void* tx_data)
+  // size_t tx(size_t n, const void* buffer, const void* tx_data)
   size_t (*tx)(size_t, const void*, const void*);
   // handlers for received packets based on their opcode
   // void handler(const char* payload, size_t payload_size, void* buffer);
