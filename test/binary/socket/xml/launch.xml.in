@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch name="socket_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
+  <node name="socket_group" xsi:type="socket_node_t" address="localhost" service="8320">
+    <node name="echo_back" xsi:type="executable_t">
+      <path os="linux" absolute="false">
+        <directory>src</directory>
+        <directory>echo_back</directory>
+      </path>
+    </node>
+    <socket from="socket" to="echo_back" />
+    <socket from="echo_back" to="socket" />
+  </node>
+</launch>

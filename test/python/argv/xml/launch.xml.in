@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch name="argv_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="@LAUNCH_XML_SCHEMA@">
+  <node name="argv" xsi:type="script_t">
+    <path absolute="false" os="linux">
+      <directory>scripts</directory>
+      <directory>main.py</directory>
+    </path>
+    <interpreter name="python_interpreter">
+      <path absolute="true" os="linux">
+        <directory>usr</directory>
+        <directory>bin</directory>
+        <directory>python</directory>
+      </path>
+    </interpreter>
+  </node>
+</launch>

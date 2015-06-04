@@ -1,2 +1,3 @@
 add_subdirectory(src)
-ADD_ENV_TEST("binary" "${CMAKE_CURRENT_SOURCE_DIR}/xml/launch.xml")
+configure_file(xml/launch.xml.in ${CMAKE_CURRENT_BINARY_DIR}/xml/launch.xml)
+ADD_ENV_TEST("binary" "${CMAKE_CURRENT_BINARY_DIR}/xml/launch.xml")

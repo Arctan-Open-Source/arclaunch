@@ -22,8 +22,8 @@ void LaunchNode::startup() {
     // Can only link files and programs from the same launch node
     int link[2];
     pipe2(link, O_CLOEXEC);
-    getNode(it->from()).linkStdout(link[1]);
-    getNode(it->to()).linkStdin(link[0]);
+    getNode(it->from()).linkFd(it->from_fd(), link[1]);
+    getNode(it->to()).linkFd(it->to_fd(), link[0]);
     close(link[0]);
     close(link[1]);
   }

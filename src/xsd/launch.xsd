@@ -48,10 +48,16 @@
       </xsd:documentation>
     </xsd:annotation>
 
-    <!-- stdin of a program or write to a file -->
+    <!-- output file descriptor or write fd of a file -->
     <xsd:attribute name="from" type="xsd:string" use="required" />
-    <!-- stdout of a program or read from a file -->
+    <!-- input file descriptor or read fd of a file -->
     <xsd:attribute name="to" type="xsd:string" use="required" />
+    <!-- The number of the write fd of the transmitter -->
+    <!-- default is stdout -->
+    <xsd:attribute name="from_fd" type="xsd:nonNegativeInteger" default="1" use="optional" />
+    <!-- The number of the read fd of the receiver -->
+    <!-- default is stdin -->
+    <xsd:attribute name="to_fd" type="xsd:nonNegativeInteger" default="0" use="optional" />
   </xsd:complexType>
 
   <xsd:complexType name="env_t">
@@ -279,8 +285,6 @@
         <!-- TODO adjust for full address description -->
         <!-- Using service uses internal DNS instead of the provided values -->
         <xsd:attribute name="service" type="xsd:string" use="optional" />
-        <!-- Uses an ephemeral port or the port given by the service if port is not specified -->
-        <xsd:attribute name="port" type="xsd:positiveInteger" use="optional" />
         <xsd:attribute name="address" type="xsd:string" use="required" />
       </xsd:extension>
     </xsd:complexContent>

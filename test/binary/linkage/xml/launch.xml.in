@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch name="linkage_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="@LAUNCH_XML_SCHEMA@">
+  <node name="from" xsi:type="executable_t">
+    <path os="linux" absolute="false">
+      <directory>src</directory>
+      <directory>from</directory>
+    </path>
+  </node>
+  <node name="to" xsi:type="executable_t">
+    <path os="linux" absolute="false">
+      <directory>src</directory>
+      <directory>to</directory>
+    </path>
+  </node>
+  <linkage from="from" to="to" />
+</launch>

@@ -1,11 +1,13 @@
 #include "SocketNode.hxx"
 #include <exception>
-
+#include <sys/select.h>
 
 namespace arclaunch {
 
 SocketNode::SocketNode(NodeContext& ctx, const socket_node_t& elem) :
   LaunchNode(ctx, elem) {
+  // The largest numbered accepting socket needs to start at 0
+  maxfd = 0;
   Addr hint;
   // No hint flags
   hint.ai_flags = 0;
@@ -20,9 +22,6 @@ SocketNode::SocketNode(NodeContext& ctx, const socket_node_t& elem) :
   hint.ai_addr = NULL;
   hint.ai_canonname = NULL;
   hint.ai_next = NULL;
-  port = 0; // use ephemeral port unless set
-  if(elem.port().present())
-    port = elem.port().get();
   int err; // error code storage
   // TODO: add limits to the XSD file to limit the acceptable strings for address and service
   // check for standard solutions to this problem in the XSD specification
@@ -33,62 +32,89 @@ SocketNode::SocketNode(NodeContext& ctx, const socket_node_t& elem) :
   
   if(err) {
     // getaddrinfo failed
+    // TODO throw a more descriptive exception
+    throw std::exception();
   }
+  seq = elem.socket();
 }
 
 SocketNode::~SocketNode() {
   waitFor();
+  for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); it++)
+    close(*it);
   freeaddrinfo(res);
 }
 
-void SocketNode::acceptConnections(Addr* addr) {
-  int fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+// Can be called multiple times to accept on even more linked lists of addresses
+void SocketNode::prepareAccept(Addr* addr) {
+  Addr* anAddr;
+  anAddr = addr;
+  do {
+    int fd;
+    sockaddr_in* s4;
+    sockaddr_in6* s6;
+    // TODO: SOCK_CLOEXEC is linux specific
+    fd = socket(anAddr->ai_family, anAddr->ai_socktype | SOCK_CLOEXEC, anAddr->ai_protocol);
+    if(fd > maxfd)
+      maxfd = fd;
+    bind(fd, anAddr->ai_addr, anAddr->ai_addrlen);
+    // uses backlog of 20
+    listen(fd, 20);
+    fds.push_back(fd);
+  } while(anAddr = anAddr->ai_next);
+  keep = true;
+}
+
+void SocketNode::acceptConnections() {
+  fd_set read_set;
   // start accepting connections
-  int sockFd;
-  bind(fd, addr->ai_addr, addr->ai_addrlen);
-  // uses backlog of 20
-  listen(fd, 20);
   // the accepted address
-  sockaddr accAddr;
-  socklen_t addrlen;
+  int numAccSock = 0;
   // close the file descriptor on exec
-  while(keep && (sockFd = accept4(sockFd, &accAddr, &addrlen, SOCK_CLOEXEC))) {
-    // Uses a lock so that different threads won't interfere with each other
-    std::unique_lock<std::mutex> forkLock(forkMtx);
-    // Configure linkage between the socket and the nodes
-    for(socket_node_t::socket_iterator it = seq.begin(); it != seq.end(); ++it) {
+  struct timeval tout = {0, 500};
+  do {
+    for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); it++) {
+      if(numAccSock == 0)
+        break;
+      int accSock = *it;
+      if(!FD_ISSET(accSock, &read_set))
+        continue;
+      numAccSock--;
+      int sockFd = accept4(accSock, NULL, NULL, SOCK_CLOEXEC);
+      if(sockFd == -1) // TODO throw a more descriptive exception
+        throw std::exception();
       // Configure linkage between the socket and the nodes
-      if(it->from() == "socket")
-        getNode(it->to()).linkStdin(sockFd);
-      else if(it->to() == "socket")
-        getNode(it->from()).linkStdout(sockFd);
+      for(socket_node_t::socket_iterator it = seq.begin(); it != seq.end(); ++it) {
+        if(it->from() == "socket")
+          getNode(it->to()).linkFd(it->to_fd(), sockFd);
+        else if(it->to() == "socket")
+          getNode(it->from()).linkFd(it->from_fd(), sockFd);
+      }
+      close(sockFd);
+      // Use LaunchNode version of startup
+      LaunchNode::startup();
     }
-    // Use LaunchNode version of startup
-    LaunchNode::startup();
-  }
+    FD_ZERO(&read_set);
+    for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
+      FD_SET(*it, &read_set);
+    numAccSock = select(maxfd + 1, &read_set, NULL, NULL, &tout);
+  } while(keep);
 }
 
 void SocketNode::startup() {
   // Start the accepting sockets
   // Create an accepting socket
-  Addr* accAddr;
-  accAddr = res;
-  do {
-    // address needs to be non-null
-    if(!accAddr->ai_addr)
-      break;
-    // start the thread
-    thrs.emplace_back(&SocketNode::acceptConnections, this, accAddr);
-  } while(accAddr = accAddr->ai_next);
+  prepareAccept(res);
+  // start the thread
+  accThread = std::thread(&SocketNode::acceptConnections, this);
 }
 
 void SocketNode::waitFor() {
   // Setup the threads to stop
   keep = false;
-  // Wait for the threads to stop cleanly
-  for(std::vector<std::thread>::iterator it = thrs.begin(); it != thrs.end(); it++) {
-    it->join();
-  }
+  // wait for the thread to stop cleanly
+  if(accThread.joinable())
+    accThread.join();
 }
 
 }

@@ -75,14 +75,13 @@ void ExecutableNode::startup() {
 
   if((pid = fork()) == 0) {
     // Map the file descriptors to pass to the forked process
-    // Overwrite stdin in the forked process
+<<<<<<< HEAD
     for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); ++it) {
       if(dup2(it->second, it->first) != it->first) {
         const char* err = "Failed to overwrite pipe\n";
         write(STDERR_FILENO, err, 27);
         exit(EXIT_FAILURE);
       }
-      close(it->second);
     }
     // forked thread
     // Deduce the proper path

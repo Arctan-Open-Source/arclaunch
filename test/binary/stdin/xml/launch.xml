@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<launch name="stdin_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
-  <node name="stdin" xsi:type="executable_t">
-    <path os="linux" absolute="false">
-      <directory>src</directory>
-      <directory>stdin</directory>
-    </path>
-  </node>
-</launch>
