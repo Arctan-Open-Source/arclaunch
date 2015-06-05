@@ -6,10 +6,10 @@ Compilation depends upon cmake 2.8 or later, a C++11 supporting compiler, and Co
 
 On linux, after all dependencies are installed the following commands can be used to compile arclaunch starting from the repository directory.
 
-> mkdir build
-> cd build
-> cmake ..
-> make
+> mkdir build  
+> cd build  
+> cmake ..  
+> make  
 
 ### Troubleshooting
 Installing Code Synthesis XSD may be complicated by name reuse between the Ubuntu package for Mono XSD and Code Synthesis's XSD package. The most clear cut way to resolve this problem is to uninstall Mono XSD.

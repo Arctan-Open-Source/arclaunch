@@ -1,7 +1,6 @@
-#include "Node.hxx"
-#include "ExecutableNode.hxx"
 #ifndef _SEQUENCE_NODE_HXX_
 #define _SEQUENCE_NODE_HXX_
+#include "GroupNode.hxx"
 
 // A sequence node takes a set of programs and runs them in serial
 
@@ -11,9 +10,11 @@
 // If one of the programs returns 1, then the chain breaks and the sequence of programs stops altogether
 namespace arclaunch {
 
-class SequenceNode : public Node {
+class SequenceNode : public GroupNode {
 private:
-  std::map<std::string, Node*> nodes;
+  unsigned int stage;
+  std::vector<std::string> order;
+  static void proceed(int retval, Node* node, void* data);
 public:
   SequenceNode(NodeContext& ctx, const sequence_node_t& sequenceElem);
   virtual ~SequenceNode();

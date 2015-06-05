@@ -5,17 +5,6 @@
 
 namespace arclaunch {
 
-// Error in case of failed forking
-class ForkError : std::exception {
-private:
-  static const char* msg;
-  int num;
-public:
-  ForkError() noexcept;
-  virtual ~ForkError();
-  virtual const char* what() const noexcept;
-};
-
 const char* ForkError::msg("Failed to fork process");
 
 ForkError::ForkError() noexcept {
@@ -29,14 +18,6 @@ const char* ForkError::what() const noexcept {
   return msg;
 }
 
-class AlreadyRunningError : std::exception {
-private:
-  static const char* msg;
-public:
-  virtual ~AlreadyRunningError();
-  virtual const char* what() const noexcept;
-};
-
 const char* AlreadyRunningError::msg("Cannot start-up an already running node");
 
 AlreadyRunningError::~AlreadyRunningError() {
@@ -46,9 +27,23 @@ const char* AlreadyRunningError::what() const noexcept {
   return msg;
 }
 
+bool ExecutableNode::reaping(false);
+
+std::map<pid_t, ExecutableNode*> ExecutableNode::running_nodes;
+
 // ExecutableNode
+void ExecutableNode::reaper(int snum, siginfo_t* info, void* uc) {
+  if(ExecutableNode::running_nodes.find(info->si_pid) != ExecutableNode::running_nodes.end()) {
+    Node* reaped_node = ExecutableNode::running_nodes[info->si_pid];
+    // remove the reaped node from the list of running_nodes
+    ExecutableNode::running_nodes.erase(info->si_pid);
+    int status;
+    waitpid(info->si_pid, &status, 0);
+    reaped_node->onDeath(WEXITSTATUS(status), reaped_node, reaped_node->deathData);
+  }
+}
+
 ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
-  // 
   pid = 0;
   pathSeq = elem.path();
   argSeq = elem.arg();
@@ -105,6 +100,7 @@ void ExecutableNode::startup() {
     // Failed to fork
     throw ForkError();
   }
+  running_nodes[pid] = this;
   // close the pipes
   closeFds();
 }

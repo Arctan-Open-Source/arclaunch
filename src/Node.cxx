@@ -13,10 +13,19 @@ Node::~Node() {
   closeFds();
 }
 
+Node::Node() {
+  onDeath = NULL;
+}
+
 void Node::closeFds() {
   for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); it++)
     close(it->first);
   fdMap.clear();
+}
+
+void Node::onComplete(NodeCompletionHandler handle, void* data) {
+  onDeath = handle;
+  deathData = data;
 }
 
 void Node::linkFd(int fd, int extFd) {
