@@ -5,17 +5,6 @@
 
 namespace arclaunch {
 
-// Error in case of failed forking
-class ForkError : std::exception {
-private:
-  static const char* msg;
-  int num;
-public:
-  ForkError() noexcept;
-  virtual ~ForkError();
-  virtual const char* what() const noexcept;
-};
-
 const char* ForkError::msg("Failed to fork process");
 
 ForkError::ForkError() noexcept {
@@ -29,14 +18,6 @@ const char* ForkError::what() const noexcept {
   return msg;
 }
 
-class AlreadyRunningError : std::exception {
-private:
-  static const char* msg;
-public:
-  virtual ~AlreadyRunningError();
-  virtual const char* what() const noexcept;
-};
-
 const char* AlreadyRunningError::msg("Cannot start-up an already running node");
 
 AlreadyRunningError::~AlreadyRunningError() {
@@ -46,9 +27,25 @@ const char* AlreadyRunningError::what() const noexcept {
   return msg;
 }
 
+bool ExecutableNode::reaping(false);
+
+struct sigaction ExecutableNode::reap;
+
+std::map<pid_t, ExecutableNode*> ExecutableNode::running_nodes;
+
 // ExecutableNode
+void ExecutableNode::reaper(int snum, siginfo_t* info, void* uc) {
+  int status;
+  pid_t reaped = wait(&status);
+  if(ExecutableNode::running_nodes.find(reaped) != ExecutableNode::running_nodes.end()) {
+    Node* reaped_node = ExecutableNode::running_nodes[reaped];
+    ExecutableNode::running_nodes.erase(reaped);
+    if(reaped_node->onDeath)
+      reaped_node->onDeath(WEXITSTATUS(status), reaped_node, reaped_node->deathData);
+  }
+}
+
 ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
-  // 
   pid = 0;
   pathSeq = elem.path();
   argSeq = elem.arg();
@@ -57,47 +54,41 @@ ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
 
 // Due to major changes, executable nodes should be reusable
 void ExecutableNode::startup() {
+  if(!reaping) {
+    reaping = true;
+    reap.sa_sigaction = reaper;
+    reap.sa_flags = SA_NOCLDSTOP;
+    sigaction(SIGCHLD, &reap, NULL);
+  }
   // construct the argument list
   std::vector<std::vector<char> > argData(argSequenceToArgData(argSeq));
   std::vector<char*> argList;
   argList.push_back(NULL);
   for(std::vector<std::vector<char> >::iterator it = argData.begin(); 
-    it != argData.end(); it++)
+    it != argData.end(); ++it)
     argList.emplace_back(it->data());
   argList.push_back(NULL);
   // construct the environment list
   std::vector<std::vector<char> > envData(envSequenceToEnvData(envSeq));
   std::vector<char*> envList;
   for(std::vector<std::vector<char> >::iterator it = envData.begin();
-    it != envData.end(); it++)
+    it != envData.end(); ++it)
     envList.emplace_back(it->data());
   envList.push_back(NULL);
 
   if((pid = fork()) == 0) {
     // Map the file descriptors to pass to the forked process
-    // Overwrite stdin in the forked process
-    for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); it++) {
-      if(it->first == it->second) {
-        // irregular case where first is the same as second
-        fcntl(it->first, F_SETFD, 0); // unset FD_CLOEXEC
-      } else if(fdMap.find(it->second) == fdMap.end()) {
-        // standard case
-        if(dup2(it->first, it->second) != it->second) {
-          const char* err = "Failed to overwrite pipe\n";
-          write(STDERR_FILENO, err, 27);
-          exit(EXIT_FAILURE);
-        }
-        close(it->first);
-      } else {
-        // irregular case in which first is already in use by another
-        // Use dup until the problem is resolved
-        // TODO: fix this special case
+    for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); ++it) {
+      if(dup2(it->first, it->second) != it->second) {
+        const char* err = "Failed to overwrite pipe\n";
+        write(STDERR_FILENO, err, 27);
+        exit(EXIT_FAILURE);
       }
     }
     // forked thread
     // Deduce the proper path
     for(executable_t::path_iterator it = pathSeq.begin(); 
-      it != pathSeq.end(); it++) {
+      it != pathSeq.end(); ++it) {
       // Check if it's the correct OS
       if(*(it->os()) != OS_STRING)
         continue;
@@ -117,6 +108,7 @@ void ExecutableNode::startup() {
     // Failed to fork
     throw ForkError();
   }
+  running_nodes[pid] = this;
   // close the pipes
   closeFds();
 }
