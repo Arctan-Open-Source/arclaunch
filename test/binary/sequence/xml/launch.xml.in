@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch name="sequence_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="@LAUNCH_XML_SCHEMA@">
+  <node name="sequence" xsi:type="sequence_node_t">
+    <node name="first_node" xsi:type="executable_t">
+      <path absolute="false" os="linux">
+        <directory>src</directory>
+        <directory>first_node</directory>
+      </path>
+    </node>
+    <node name="second_node" xsi:type="executable_t">
+      <path absolute="false" os="linux">
+        <directory>src</directory>
+        <directory>second_node</directory>
+      </path>
+    </node>
+  </node>
+</launch>

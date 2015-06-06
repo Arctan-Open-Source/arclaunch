@@ -16,6 +16,7 @@ private:
   static std::map<pid_t, ExecutableNode*> running_nodes;
   // used to indicate if reaper has been set as the SIGCHLD handler
   static bool reaping;
+  static struct sigaction reap;
   // The SIGCHLD callback
   static void reaper(int snum, siginfo_t* info, void* uc);
 public:

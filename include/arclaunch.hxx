@@ -7,6 +7,7 @@
 #include "ExecutableNode.hxx"
 #include "ScriptNode.hxx"
 #include "LaunchNode.hxx"
+#include "SequenceNode.hxx"
 #include "SocketNode.hxx"
 
 
@@ -22,6 +23,7 @@ NodeContext& context() {
     notify<ExecutableNode, executable_t>(ctx);
     notify<ScriptNode, script_t>(ctx);
     notify<LaunchNode, launch_t>(ctx);
+    notify<SequenceNode, sequence_node_t>(ctx);
     notify<SocketNode, socket_node_t>(ctx);
     first = false;
   }

@@ -29,17 +29,19 @@ const char* AlreadyRunningError::what() const noexcept {
 
 bool ExecutableNode::reaping(false);
 
+struct sigaction ExecutableNode::reap;
+
 std::map<pid_t, ExecutableNode*> ExecutableNode::running_nodes;
 
 // ExecutableNode
 void ExecutableNode::reaper(int snum, siginfo_t* info, void* uc) {
-  if(ExecutableNode::running_nodes.find(info->si_pid) != ExecutableNode::running_nodes.end()) {
-    Node* reaped_node = ExecutableNode::running_nodes[info->si_pid];
-    // remove the reaped node from the list of running_nodes
-    ExecutableNode::running_nodes.erase(info->si_pid);
-    int status;
-    waitpid(info->si_pid, &status, 0);
-    reaped_node->onDeath(WEXITSTATUS(status), reaped_node, reaped_node->deathData);
+  int status;
+  pid_t reaped = wait(&status);
+  if(ExecutableNode::running_nodes.find(reaped) != ExecutableNode::running_nodes.end()) {
+    Node* reaped_node = ExecutableNode::running_nodes[reaped];
+    ExecutableNode::running_nodes.erase(reaped);
+    if(reaped_node->onDeath)
+      reaped_node->onDeath(WEXITSTATUS(status), reaped_node, reaped_node->deathData);
   }
 }
 
@@ -52,6 +54,12 @@ ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
 
 // Due to major changes, executable nodes should be reusable
 void ExecutableNode::startup() {
+  if(!reaping) {
+    reaping = true;
+    reap.sa_sigaction = reaper;
+    reap.sa_flags = SA_NOCLDSTOP;
+    sigaction(SIGCHLD, &reap, NULL);
+  }
   // construct the argument list
   std::vector<std::vector<char> > argData(argSequenceToArgData(argSeq));
   std::vector<char*> argList;

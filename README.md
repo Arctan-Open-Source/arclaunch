@@ -2,7 +2,7 @@
 A utility for starting up and managing a set of programs in parallel.
 
 ## Compilation
-Compilation depends upon cmake 2.8 or later, a C++11 supporting compiler, and Code Synthesis XSD 4.0.0 or later.
+Compilation depends upon [cmake 2.8 or later](http://www.cmake.org/), a C++11 supporting compiler, and [Code Synthesis XSD 4.0.0 or later](http://www.codesynthesis.com/projects/xsd/).
 
 On linux, after all dependencies are installed the following commands can be used to compile arclaunch starting from the repository directory.
 
