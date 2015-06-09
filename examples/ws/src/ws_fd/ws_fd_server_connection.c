@@ -1,26 +1,29 @@
-#include "ws_encode_decode.h"
+#include "ws_fd_encode_decode.h"
+#include "ws_simple_frames.h"
 
-struct ws_connection make_ws_fd_server_connection(int *fd) {
+struct ws_connection make_ws_fd_server_connection(int *in_fd, int*out_fd) {
   struct ws_connection conn = {
-    SERVER,
+    WS_SERVER,
+    0,
+    0, 
     NULL,
-    fd,
-    fd,
+    in_fd,
+    out_fd,
     &ws_fd_rx,
     &ws_fd_tx,
     {
       .array = {
-        &ws_fd_continuation_handler,
-        &ws_fd_text_handler,
-        &ws_fd_binary_handler,
+        &ws_simple_continuation_handler,
+        &ws_simple_text_handler,
+        &ws_simple_binary_handler,
         NULL,
         NULL,
         NULL,
         NULL,
         NULL,
-        &ws_fd_close_handler,
-        &ws_fd_ping_handler,
-        &ws_fd_pong_handler,
+        &ws_simple_close_handler,
+        &ws_simple_ping_handler,
+        &ws_simple_pong_handler,
         NULL,
         NULL,
         NULL,
@@ -29,5 +32,6 @@ struct ws_connection make_ws_fd_server_connection(int *fd) {
       }
     }
   };
+  return conn;
 }
 

@@ -1,6 +1,6 @@
 #include "ws_encode_decode.h"
 
-size_t get_ws_header_size(const struct ws_packet* pack) {
+size_t get_ws_header_size(const struct ws_frame* pack) {
   switch(pack->size) {
   case 0xFF:
     // masked with 64 bit payload size
@@ -16,7 +16,7 @@ size_t get_ws_header_size(const struct ws_packet* pack) {
     return 4;
   default:
     // less than 126 byte payload
-    if(packet_is_masked(pack))
+    if(ws_frame_is_masked(pack))
       return 6;
     else
       return 2;

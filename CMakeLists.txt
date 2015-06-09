@@ -24,5 +24,14 @@ include_directories(include ${XSD_INCLUDE_DIR} ${CMAKE_BINARY_DIR}/src)
 
 add_subdirectory(src)
 add_subdirectory(include)
-
 add_subdirectory(test)
+
+configure_file(cmake/arclaunch-config.cmake.in 
+  ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config.cmake)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config.cmake
+  DESTINATION
+    ${CMAKE_INSTALL_PREFIX}/arclaunch
+    )
+

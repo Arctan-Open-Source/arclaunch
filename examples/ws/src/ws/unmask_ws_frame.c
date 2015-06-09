@@ -1,17 +1,17 @@
 #include "ws_encode_decode.h"
 
 
-void ws_unmask_packet(struct ws_packet* pack) {
+void unmask_ws_frame(struct ws_frame* pack) {
   size_t size, c;
   char* mask;
   size = get_ws_payload_size(pack);
-  // Just return early if the packet isn't masked
-  if(!packet_is_masked(pack))
+  // Just return early if the frame isn't masked
+  if(!frame_is_masked(pack))
     return;
-  mask = get_ws_packet_mask(pack);
+  mask = get_ws_frame_mask(pack);
   // Unset the mask bit
   pack->size &= 0x7F;
-  // Unmask the packet
+  // Unmask the frame
   for(c = 0; c < size; c++) {
     // XOR the payload
     pack->payload[c] ^= mask[c % 4];

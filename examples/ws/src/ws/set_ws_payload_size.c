@@ -1,6 +1,6 @@
 #include "ws_encode_decode.h"
 
-void set_ws_payload_size(struct ws_packet* pack, size_t size) {
+void set_ws_payload_size(struct ws_frame* pack, size_t size) {
   // Note that this does not allocate space correctly
   // space will need to be reallocated
   size_t old_size = get_ws_payload_size(pack);
@@ -8,10 +8,10 @@ void set_ws_payload_size(struct ws_packet* pack, size_t size) {
   char *mask_loc;
   char mask[4];
   int is_masked;
-  is_masked = packet_is_masked(pack);
+  is_masked = ws_frame_is_masked(pack);
   if(is_masked) {
     // record the mask
-    mask_loc = get_ws_packet_mask(pack);
+    mask_loc = get_ws_frame_mask(pack);
     mask[0] = mask_loc[0];
     mask[1] = mask_loc[1];
     mask[2] = mask_loc[2];
@@ -34,7 +34,7 @@ void set_ws_payload_size(struct ws_packet* pack, size_t size) {
   
   if(is_masked) {
     // rewrite the mask
-    mask_loc = get_ws_packet_mask(pack);
+    mask_loc = get_ws_frame_mask(pack);
     mask_loc[0] = mask[0];
     mask_loc[1] = mask[1];
     mask_loc[2] = mask[2];

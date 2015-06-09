@@ -1,16 +1,33 @@
 <?xml version="1.0"?>
-<launch name="ws_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://matt5sean3.com/launch.xsd">
+<launch name="ws_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="@ARCLAUNCH_XML_SCHEMA@">
   <!-- Sets up a websocket server on port 8032 -->
   <!-- The application overall is meant to facilitate exchange of information for WebRTC -->
-  <node name="player" xsi:type="socket_node_t" address="localhost" port="8032">
+  <node name="player" xsi:type="socket_node_t" address="localhost" service="8032">
     
-    <!-- Uses a compiled C program for packet encoding and decoding -->
-    <node name="encode_decode" xsi:type="executable_t">
-      <path os="linux" absolute="false">
-        <directory>build</directory>
-        <directory>src</directory>
-        <directory>encode_decode</directory>
-      </path>
+    <!-- Uses a mix of Perl and C for WebSocket protocol -->
+    <node name="encode_decode" xsi:type="sequence_node_t">
+      <!-- Uses Perl to complete the handshake -->
+      <node name="handshake" xsi:type="script_t">
+        <path os="linux" absolute="false">
+          <directory>scripts</directory>
+          <directory>handshake.pl</directory>
+        </path>
+        <interpreter name="perl_interpreter">
+          <path os="linux" absolute="true">
+            <directory>usr</directory>
+            <directory>bin</directory>
+            <directory>perl</directory>
+          </path>
+        </interpreter>
+      </node>
+      <!-- Uses C to decode and encode packets -->
+      <node name="ws_packet" xsi:type="executable_t">
+        <path os="linux" absolute="false">
+          <directory>build</directory>
+          <directory>src</directory>
+          <directory>encode_decode</directory>
+        </path>
+      </node>
     </node>
     
     <!-- Uses a python script for handling user logic -->
@@ -36,21 +53,4 @@
     <socket from="socket" to="encode_decode" to_fd="3" />
     <socket from="encode_decode" to="socket" from_fd="4" />
   </node>
-  
-  <!-- Global logic is maintained by a perl script -->
-  <node name="world" xsi:type="script_t">
-    <path os="linux" absolute="false">
-      <directory>scripts</directory>
-      <directory>world.pl</directory>
-    </path>
-    <interpreter name="perl_interpreter">
-      <path os="linux" absolute="true">
-        <directory>usr</directory>
-        <directory>bin</directory>
-        <directory>perl</directory>
-      </path>
-    </interpreter>
-  </node>
-  <linkage from="world" to="player" />
-  <linkage from="player" to="world" />
 </launch>

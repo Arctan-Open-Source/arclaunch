@@ -9,33 +9,18 @@ add_library(ws_utility
   utility/reversell.c # done
   )
 
-add_library(http_encode_decode
-  # HTTP functions
-  http/decode_http_request_line.c
-  http/encode_http_request_line.c
-
-  http/decode_http_header_line.c
-  http/encode_http_header_line.c
-
-  http/decode_http_response_line.c
-  http/encode_http_response_line.c
-
-  http/str_to_http_method.c # done
-  http/http_method_to_str.c # done
-  http/str_to_http_version.c # done
-  )
 
 add_library(ws_encode_decode
   # WS functions
   ws/get_ws_opcode.c # done
   ws/set_ws_opcode.c # done
-  ws/ws_packet_is_final.c # done
-  ws/make_ws_packet_final.c # done
-  ws/make_ws_packet_non_final.c # done
+  ws/ws_frame_is_final.c # done
+  ws/make_ws_frame_final.c # done
+  ws/make_ws_frame_non_final.c # done
 
-  ws/ws_packet_is_masked.c # done
-  ws/mask_ws_packet.c # done
-  ws/unmask_ws_packet.c # done
+  ws/ws_frame_is_masked.c # done
+  ws/mask_ws_frame.c # done
+  ws/unmask_ws_frame.c # done
 
   ws/allocate_ws_payload.c # done
   ws/free_ws_payload.c # done
@@ -44,24 +29,51 @@ add_library(ws_encode_decode
   ws/get_ws_payload_size.c # done
   ws/set_ws_payload_size.c # done
   
-  ws/get_ws_packet_mask.c # done
+  ws/get_ws_frame_mask.c # done
   
   # User facing functions
-  ws/ws_rx_packet.c
-  ws/ws_tx_packet.c
+  ws/ws_rx_frame.c
+  ws/ws_tx_frame.c
   )
 
 target_link_libraries(ws_encode_decode
   ws_utility
   )
 
+
+add_library(ws_simple_frame_handler
+  ws_simple/ws_simple_continuation_handler.c
+  ws_simple/ws_simple_text_handler.c
+  ws_simple/ws_simple_binary_handler.c
+  ws_simple/ws_simple_close_handler.c
+  ws_simple/ws_simple_ping_handler.c
+  ws_simple/ws_simple_pong_handler.c
+  )
+
+target_link_libraries(ws_simple_frame_handler
+  ws_encode_decode
+  )
+
+
+add_library(ws_fd_encode_decode
+  ws_fd/ws_fd_client_connection.c
+  ws_fd/ws_fd_server_connection.c
+  ws_fd/ws_fd_rx.c
+  ws_fd/ws_fd_tx.c
+  )
+
+target_link_libraries(ws_fd_encode_decode
+  ws_simple_frame_handler
+  ws_encode_decode
+  )
+
+
 # The encode_decode executable handles websockets
 add_executable(encode_decode
-  encode_decode.c
+  ws_trans.c
   )
 
 target_link_libraries(encode_decode
-  http_encode_decode
-  ws_encode_decode
+  ws_fd_encode_decode
   )
 

@@ -2,9 +2,9 @@
 // required for NULL
 #include <stdlib.h>
 
-char* get_ws_packet_mask(struct ws_packet* pack) {
+char* get_ws_frame_mask(struct ws_frame* pack) {
   char* ret;
-  if(!packet_is_masked(pack))
+  if(!ws_frame_is_masked(pack))
     return NULL;
   char size = pack->size & 0x7F;
   if(pack->size == 0xFF) // 127, 64 bit extended payload
