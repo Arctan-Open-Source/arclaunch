@@ -14,7 +14,11 @@ Node::~Node() {
 }
 
 Node::Node() {
-  onDeath = NULL;
+}
+
+Node::CompletionHandler::CompletionHandler(Node::CompletionCallback call, void* deathData) {
+  callback = call;
+  data = deathData;
 }
 
 void Node::closeFds() {
@@ -23,9 +27,8 @@ void Node::closeFds() {
   fdMap.clear();
 }
 
-void Node::onComplete(NodeCompletionHandler handle, void* data) {
-  onDeath = handle;
-  deathData = data;
+void Node::addCompletionHandler(CompletionCallback handle, void* data) {
+  onDeath.emplace_back(handle, data);
 }
 
 void Node::linkFd(int fd, int extFd) {

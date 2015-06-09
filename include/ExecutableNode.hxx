@@ -1,4 +1,5 @@
 #include "Node.hxx"
+#include <vector>
 #include <map>
 #include <signal.h>
 #ifndef _EXECUTABLE_NODE_HXX_
@@ -8,7 +9,7 @@ namespace arclaunch {
 // Derive from the mapped types
 class ExecutableNode : public Node {
 private:
-  pid_t pid;
+  std::set<pid_t> pids;
   executable_t::path_sequence pathSeq;
   executable_t::arg_sequence argSeq;
   executable_t::env_sequence envSeq;
@@ -27,12 +28,12 @@ public:
   // When startup is called the passed in file descriptors are closed in the parent process
   virtual void startup();
   virtual bool isRunning() const;
-  virtual pid_t getPid() const;
   virtual void waitFor();
   // The file descriptors given to the process is "dup"ed so that even if the provided descriptor is closed
   // the newly created descriptor will be closed on exec
   virtual void appendArguments(const executable_t::arg_sequence& args);
   virtual void appendEnvironment(const executable_t::env_sequence& env);
+  void reapProcess(pid_t reaped, int retval);
 };
 
 // Exception Classes

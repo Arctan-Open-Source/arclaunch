@@ -8,7 +8,7 @@ SequenceNode::SequenceNode(NodeContext& ctx, const sequence_node_t& sequenceElem
   // set onComplete for each node
   for(sequence_node_t::node_const_iterator it = sequenceElem.node().begin();
     it != sequenceElem.node().end(); ++it) {
-    getNode(it->name()).onComplete(SequenceNode::proceed, this);
+    getNode(it->name()).addCompletionHandler(SequenceNode::proceed, this);
     order.push_back(it->name());
   }
 }
@@ -28,8 +28,10 @@ void SequenceNode::proceed(int retval, Node* node, void* data) {
   if(retval || self->stage >= self->order.size()) { 
     // non-0 exit code or finished, stop everything
     // call onDeath
-    if(self->onDeath)
-      self->onDeath(retval, self, self->deathData);
+    for(std::vector<CompletionHandler>::iterator it = self->onDeath.begin(); 
+      it != self->onDeath.end(); ++it) {
+      (it->callback)(retval, self, it->data);
+    }
     self->stage = -1;
     self->closeFds();
     return;

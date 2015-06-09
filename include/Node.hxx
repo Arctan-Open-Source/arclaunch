@@ -1,5 +1,6 @@
 
 #include "launch.hxx"
+#include <vector>
 #include <map>
 
 // Linux/Unix libraries
@@ -21,10 +22,14 @@ class NodeContext;
 // An interface class for executing node elements
 class Node {
 public:
-  typedef void (*NodeCompletionHandler)(int, Node*, void*);
-  //
-  NodeCompletionHandler onDeath;
-  void* deathData;
+  typedef void (*CompletionCallback)(int, Node*, void*);
+  struct CompletionHandler {
+  public:
+    CompletionHandler(CompletionCallback call, void* deathData);
+    CompletionCallback callback;
+    void* data;
+  };
+  std::vector<CompletionHandler> onDeath;
 protected:
   std::map<int, int> fdMap;
   void closeFds();
@@ -36,7 +41,7 @@ public:
   virtual bool isRunning() const = 0;
   virtual void waitFor() = 0;
   // A function that gets called when the node completes
-  virtual void onComplete(NodeCompletionHandler handle, void* data);
+  virtual void addCompletionHandler(CompletionCallback handle, void* data);
   // Used to pass file descriptors to the process that will be forked
   // Very much low-level action
   virtual void linkFd(int fd, int extFd);

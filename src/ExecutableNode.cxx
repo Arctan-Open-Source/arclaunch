@@ -38,15 +38,20 @@ void ExecutableNode::reaper(int snum, siginfo_t* info, void* uc) {
   int status;
   pid_t reaped = wait(&status);
   if(ExecutableNode::running_nodes.find(reaped) != ExecutableNode::running_nodes.end()) {
-    Node* reaped_node = ExecutableNode::running_nodes[reaped];
-    ExecutableNode::running_nodes.erase(reaped);
-    if(reaped_node->onDeath)
-      reaped_node->onDeath(WEXITSTATUS(status), reaped_node, reaped_node->deathData);
+    ExecutableNode::running_nodes[reaped]->reapProcess(reaped, WEXITSTATUS(status));
+  }
+}
+
+void ExecutableNode::reapProcess(pid_t reaped, int retval) {
+  running_nodes.erase(reaped);
+  pids.erase(reaped);
+  for(std::vector<Node::CompletionHandler>::iterator it = onDeath.begin(); 
+    it != onDeath.end(); ++it) {
+    (it->callback)(retval, this, it->data);
   }
 }
 
 ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
-  pid = 0;
   pathSeq = elem.path();
   argSeq = elem.arg();
   envSeq = elem.env();
@@ -75,7 +80,8 @@ void ExecutableNode::startup() {
     it != envData.end(); ++it)
     envList.emplace_back(it->data());
   envList.push_back(NULL);
-
+  
+  pid_t pid;
   if((pid = fork()) == 0) {
     // Map the file descriptors to pass to the forked process
     for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); ++it) {
@@ -108,33 +114,24 @@ void ExecutableNode::startup() {
     // Failed to fork
     throw ForkError();
   }
+  pids.insert(pid);
   running_nodes[pid] = this;
   // close the pipes
   closeFds();
 }
 
 bool ExecutableNode::isRunning() const {
-  if(pid == 0)
-    return false;
-  else
-  {
-    // TODO: vary by operating system
-    int status;
-    pid_t exited = waitpid(pid, &status, WNOHANG);
-    // returns 0 if no child has stopped which casts to false as a bool
-    return exited;
-  }
-}
-
-pid_t ExecutableNode::getPid() const {
-  return pid;
+  return !pids.empty();
 }
 
 void ExecutableNode::waitFor() {
   int status;
-  if(pid != 0)
-    waitpid(pid, &status, 0);
-    // TODO: use macros to determine the circumstances of the exit
+  pid_t pid;
+  while(isRunning()) {
+    pid = waitpid(*pids.begin(), &status, 0);
+    if(pid != -1)
+      reapProcess(pid, WEXITSTATUS(status));
+  }
 }
 
 void ExecutableNode::appendArguments(const executable_t::arg_sequence& args) {
