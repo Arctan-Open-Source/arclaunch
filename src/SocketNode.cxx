@@ -71,8 +71,8 @@ void SocketNode::acceptConnections() {
   // the accepted address
   int numAccSock = 0;
   // close the file descriptor on exec
-  struct timeval tout = {0, 500};
   do {
+    struct timeval tout = {5, 0};
     for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); it++) {
       if(numAccSock == 0)
         break;
@@ -115,6 +115,8 @@ void SocketNode::waitFor() {
   // wait for the thread to stop cleanly
   if(accThread.joinable())
     accThread.join();
+  // allow the running sockets to close
+  LaunchNode::waitFor();
 }
 
 }

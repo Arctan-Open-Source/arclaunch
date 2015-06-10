@@ -39,13 +39,19 @@ void Node::linkFd(int fd, int extFd) {
   int result = -1;
   while(result == -1) {
     // Check that nFd is not currently an open file descriptor
-    if(fcntl(nFd, F_GETFD) != -1 || errno != EBADF) {
+    if(fcntl(nFd, F_GETFD) != -1) {
       nFd++;
       continue;
     }
     result = dup3(extFd, nFd, O_CLOEXEC);
-    if(result == -1) // TODO throw a more descriptive exception
+    if(result == -1) {
+      if(errno == EBUSY) { // keep trying
+        nFd++;
+        continue;
+      }
+      // TODO throw a more descriptive exception
       throw std::exception();
+    }
   }
   fdMap[nFd] = fd;
 }
