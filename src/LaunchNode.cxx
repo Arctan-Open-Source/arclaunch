@@ -4,16 +4,20 @@
 
 namespace arclaunch {
 
-// LaunchNode
-LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) :
-  GroupNode(ctx, launchElem) {
-  // copy the linkage information from the launch element
-  links = launchElem.linkage();
+// private methods
+void LaunchNode::onSubNodeDeath(int retval, Node* subNode, 
+  void* launchInst, int instNum) {
+  LaunchInstance* self = static_cast<LaunchInstance*>(launchInst);
+  self->nodeInstances.erase(subNode);
+  if(self->nodeInstances.empty()) {
+    // dispatch finishInstance
+    self->owner->finishInstance(self->instNum, 0);
+    self->owner->instances.erase(self->instNum);
+  }
 }
 
-LaunchNode::~LaunchNode() {}
-
-void LaunchNode::startup() {
+// protected methods
+void LaunchNode::startInstance(int instNum) {
   // Starting up repeatedly without issue should now be possible
   
   // Configure linkage between nodes
@@ -28,26 +32,38 @@ void LaunchNode::startup() {
     close(link[1]);
   }
 
+  instances.emplace(
+    std::piecewise_construct, 
+    std::forward_as_tuple(instNum), 
+    std::forward_as_tuple());
+  LaunchInstance* inst = &instances[instNum];
+  inst->owner = this;
+  inst->instNum = instNum;
   // Start all of the sub-nodes
   for(node_iterator it = nodes.begin(); it != nodes.end(); it++) {
-    it->second->startup();
+    // Hold onto the instance numbers for each node
+    // Add a callback to the instance to make detecting closure easier
+    it->second->addInstanceCompletionHandler(onSubNodeDeath, inst);
+    inst->nodeInstances[it->second] = it->second->startup();
   }
-  // linkage is cleared by startup
-  closeFds();
 }
 
-bool LaunchNode::isRunning() const {
-  for(const_node_iterator it = nodes.begin(); it != nodes.end(); it++) {
-    if(it->second->isRunning()) {
-      return true;
-    }
-  }
-  return false;
+// public methods
+// LaunchNode
+LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) :
+  GroupNode(ctx, launchElem) {
+  // copy the linkage information from the launch element
+  links = launchElem.linkage();
 }
 
-void LaunchNode::waitFor() {
-  for(const_node_iterator it = nodes.begin(); it != nodes.end(); it++) {
-    it->second->waitFor();
+LaunchNode::~LaunchNode() {}
+
+
+void LaunchNode::waitForInstance(int instNum) {
+  while(instanceIsRunning(instNum)) {
+    std::map<Node*, int>::iterator subInst = 
+      instances[instNum].nodeInstances.begin();
+    subInst->first->waitForInstance(subInst->second);
   }
 }
 

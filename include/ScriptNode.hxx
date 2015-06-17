@@ -4,9 +4,6 @@
 namespace arclaunch {
 
 class ScriptNode : public ExecutableNode {
-private:
-  Node* interpreter;
-  script_t* appended;
 public:
   ScriptNode(NodeContext& ctx, const script_t& scriptElem);
   virtual ~ScriptNode();

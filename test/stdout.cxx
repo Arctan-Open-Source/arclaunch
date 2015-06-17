@@ -14,7 +14,9 @@ protected:
   arclaunch::Node* subElem;
   int outLink[2];
   int errLink[2];
-  void connectPipes();
+  int outLink2[2];
+  int errLink2[2];
+  void connectPipes(int *out, int *err);
   virtual void SetUp();
   virtual void TearDown();
 };
@@ -31,17 +33,17 @@ void NodeTest::TearDown() {
   close(errLink[0]);
 }
 
-void NodeTest::connectPipes() {
-  pipe2(outLink, O_CLOEXEC);
-  pipe2(errLink, O_CLOEXEC);
-  subElem->linkStdout(outLink[1]);
-  subElem->linkStderr(errLink[1]);
-  close(outLink[1]);
-  close(errLink[1]);
+void NodeTest::connectPipes(int *out, int *err) {
+  pipe2(out, O_CLOEXEC);
+  pipe2(err, O_CLOEXEC);
+  subElem->linkStdout(out[1]);
+  subElem->linkStderr(err[1]);
+  close(out[1]);
+  close(err[1]);
 }
 
 TEST_F(NodeTest, run_stdout) {
-  connectPipes();
+  connectPipes(outLink, errLink);
   elem->startup();
   // Let the process complete
   subElem->waitFor();
@@ -57,7 +59,7 @@ TEST_F(NodeTest, run_stdout) {
 TEST_F(NodeTest, repeat_stdout) {
   std::string empty("");
   // Go through the whole process
-  connectPipes();
+  connectPipes(outLink, errLink);
   elem->startup();
   subElem->waitFor();
   // Ensure that stdout works
@@ -66,11 +68,30 @@ TEST_F(NodeTest, repeat_stdout) {
   EXPECT_EQ(empty, err);
   EXPECT_EQ("STDOUT TEST", out);
   // Repeat the process
-  connectPipes();
+  connectPipes(outLink, errLink);
   elem->startup();
   subElem->waitFor();
   out = drainFd(outLink[0]);
   err = drainFd(errLink[0]);
   EXPECT_EQ(empty, err);
   EXPECT_EQ("STDOUT TEST", out);
+}
+
+// Test running two instances of the launch file in parallel
+TEST_F(NodeTest, parallel_stdout) {
+  std::string empty("");
+  // Start the process twice, linked to two different sets of pipes
+  connectPipes(outLink, errLink);
+  elem->startup();
+  connectPipes(outLink2, errLink2);
+  elem->startup();
+  subElem->waitFor();
+  std::string out(drainFd(outLink[0]));
+  std::string err(drainFd(errLink[0]));
+  std::string out2(drainFd(outLink2[0]));
+  std::string err2(drainFd(errLink2[0]));
+  EXPECT_EQ(empty, err);
+  EXPECT_EQ("STDOUT TEST", out);
+  EXPECT_EQ(empty, err2);
+  EXPECT_EQ("STDOUT TEST", out2);
 }

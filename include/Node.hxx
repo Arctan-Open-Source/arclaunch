@@ -21,33 +21,144 @@ class NodeContext;
 
 // An interface class for executing node elements
 class Node {
-public:
-  typedef void (*CompletionCallback)(int, Node*, void*);
-  struct CompletionHandler {
+private:
+  /**
+   *  CompletionCallback is used for responding to a node's completion.
+   *  
+   *  void CompletionCallback(int retval, Node* node, void* data, int instNum);
+   */
+  typedef void (*CompletionCallback)(int, Node*, void*, int);
+  class CompletionHandler {
   public:
     CompletionHandler(CompletionCallback call, void* deathData);
     CompletionCallback callback;
     void* data;
   };
-  std::vector<CompletionHandler> onDeath;
-protected:
   std::map<int, int> fdMap;
+  std::vector<CompletionHandler> onDeath;
+  std::vector<CompletionHandler> onInstanceDeath;
+  std::map<int, std::vector<CompletionHandler> > instances;
   void closeFds();
+protected:
+  /**
+   *  Must be called by derived nodes when their instance completes.
+   *
+   *  @param instNum The instance number of the completing node.
+   *  @param retval The return value from the instance node.
+   */
+  void finishInstance(int instNum, int retval);
+
+  /**
+   *  Must be called by derived nodes to correctly overwrite file descriptors
+   *  
+   *  Note: this should be called after the process has forked. Group nodes
+   *    generally will not directly call this function.
+   */
+  void overwriteFds();
+
+  /**
+   *  Can be called by Group nodes to devolve file descriptor connections.
+   * 
+   *  @param child The node to which the file descriptors are devolved.
+   */
+  void passFds(Node& child);
+  
+  /**
+   *  Must be implemented by derived nodes to start an instance of a node.
+   * 
+   *  @param instNum The instance number for the newly generated instance.
+   */
+  virtual void startInstance(int instNum) = 0;
 public:
   Node();
   virtual ~Node();
-  // Used to set the constructed node running
-  virtual void startup() = 0;
-  virtual bool isRunning() const = 0;
-  virtual void waitFor() = 0;
-  // A function that gets called when the node completes
-  virtual void addCompletionHandler(CompletionCallback handle, void* data);
-  // Used to pass file descriptors to the process that will be forked
-  // Very much low-level action
-  virtual void linkFd(int fd, int extFd);
-  virtual void linkStdin(int fd);
-  virtual void linkStdout(int fd);
-  virtual void linkStderr(int fd);
+
+  /**
+   *  Starts a new instance of this node and returns the instance of the new instance.
+   *  
+   *  @return the instance number for the new instance.
+   *
+   *  Note: an instance number may be re-used one an instance has finished.
+   */
+  int startup();
+
+  /**
+   *  Detects whether the given instance is currently running.
+   *  
+   *  @param instNum the instance number of the instance to check
+   *  @return true if the given instance is running, false otherwise
+   */
+  bool instanceIsRunning(int instNum) const;
+
+  /**
+   *  Detects whether there are any instances currently running.
+   * 
+   *  @return true if at least one instance is running, false otherwise
+   */
+  bool isRunning() const;
+
+  /**
+   *  Blocks execution until the given instance has completed.
+   *  
+   *  @param the instance to wait for
+   */
+  virtual void waitForInstance(int instNum) = 0;
+
+  /**
+   * Waits until all instances of the node have completed.
+   */
+  void waitFor();
+
+  /**
+   *  Sets a callback that is called upon completion of the next started instance.
+   */
+  void addInstanceCompletionHandler(CompletionCallback handle, void* data);
+
+  /**
+   *  Sets a callback that is called upon completion of any instance.
+   */
+  void addCompletionHandler(CompletionCallback handle, void* data);
+  
+
+  /**
+   *  Connects the passed in file descriptor to the next node instance started.
+   *
+   *  extFd is duped so extFd can and should be closed unless used elsewhere in
+   *  arclaunch.
+   *  
+   *  @param fd The file descriptor number as seen by the instance.
+   *  @param extFd The file descriptor number as currently experienced by 
+   *    arclaunch
+   */
+  void linkFd(int fd, int extFd);
+
+  /**
+   *  Connects the file descriptor as STDIN for the next instance started.
+   *  
+   *  fd is duped and should be closed unless used elsewhere in arclaunch.
+   *
+   *  @param fd The file descriptor number as it is in arclaunch.
+   */
+  void linkStdin(int fd);
+
+  /**
+   *  Connects the file descriptor as STDOUT for the next instance started.
+   *
+   *  fd is duped and should be closed unless used elsewhere in arclaunch.
+   *
+   *  @param fd The file descriptor number as it is in arclaunch
+   */
+  void linkStdout(int fd);
+
+  /**
+   *  Connects the file descriptor as STDERR for the next instance started.
+   *
+   *  fd is duped and should be closed unless used elsewhere in arclaunch.
+   *
+   *  @param fd The file descriptor number as it is in arclaunch
+   */
+  void linkStderr(int fd);
+  
   // Useful static methods
   static bool isReadable(int fd);
   static bool isWritable(int fd);

@@ -18,15 +18,6 @@ const char* ForkError::what() const noexcept {
   return msg;
 }
 
-const char* AlreadyRunningError::msg("Cannot start-up an already running node");
-
-AlreadyRunningError::~AlreadyRunningError() {
-}
-
-const char* AlreadyRunningError::what() const noexcept {
-  return msg;
-}
-
 bool ExecutableNode::reaping(false);
 
 struct sigaction ExecutableNode::reap;
@@ -34,23 +25,25 @@ struct sigaction ExecutableNode::reap;
 std::map<pid_t, ExecutableNode*> ExecutableNode::running_nodes;
 
 // ExecutableNode
+
+// private methods
 void ExecutableNode::reaper(int snum, siginfo_t* info, void* uc) {
   int status;
   pid_t reaped = wait(&status);
-  if(ExecutableNode::running_nodes.find(reaped) != ExecutableNode::running_nodes.end()) {
-    ExecutableNode::running_nodes[reaped]->reapProcess(reaped, WEXITSTATUS(status));
+  if(running_nodes.find(reaped) != running_nodes.end()) {
+    running_nodes[reaped]->reapProcess(reaped, WEXITSTATUS(status));
   }
 }
 
 void ExecutableNode::reapProcess(pid_t reaped, int retval) {
   running_nodes.erase(reaped);
-  pids.erase(reaped);
-  for(std::vector<Node::CompletionHandler>::iterator it = onDeath.begin(); 
-    it != onDeath.end(); ++it) {
-    (it->callback)(retval, this, it->data);
-  }
+  finishInstance(pidInstance[reaped], retval);
 }
 
+
+// protected methods
+
+// public methods
 ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
   pathSeq = elem.path();
   argSeq = elem.arg();
@@ -58,7 +51,7 @@ ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
 }
 
 // Due to major changes, executable nodes should be reusable
-void ExecutableNode::startup() {
+void ExecutableNode::startInstance(int instNum) {
   if(!reaping) {
     reaping = true;
     reap.sa_sigaction = reaper;
@@ -84,13 +77,7 @@ void ExecutableNode::startup() {
   pid_t pid;
   if((pid = fork()) == 0) {
     // Map the file descriptors to pass to the forked process
-    for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); ++it) {
-      if(dup2(it->first, it->second) != it->second) {
-        const char* err = "Failed to overwrite pipe\n";
-        write(STDERR_FILENO, err, 27);
-        exit(EXIT_FAILURE);
-      }
-    }
+    overwriteFds();
     // forked thread
     // Deduce the proper path
     for(executable_t::path_iterator it = pathSeq.begin(); 
@@ -105,8 +92,6 @@ void ExecutableNode::startup() {
       int failure;
       failure = execve(path.data(), argList.data(), envList.data());
     }
-    // Starting the process failed somehow
-    // exit 1, 
     const char* err = "Failed to find viable executable path";
     write(STDERR_FILENO, err, 39);
     exit(EXIT_FAILURE);
@@ -114,22 +99,25 @@ void ExecutableNode::startup() {
     // Failed to fork
     throw ForkError();
   }
-  pids.insert(pid);
   running_nodes[pid] = this;
+  pidInstance[pid] = instNum;
   // close the pipes
-  closeFds();
 }
 
-bool ExecutableNode::isRunning() const {
-  return !pids.empty();
-}
-
-void ExecutableNode::waitFor() {
+void ExecutableNode::waitForInstance(int instNum) {
   int status;
-  pid_t pid;
-  while(isRunning()) {
-    pid = waitpid(*pids.begin(), &status, 0);
-    if(pid != -1)
+  pid_t pid, result;
+  // Find the pid, it's an inefficient action, but who cares we're burning
+  // time anyway
+  // TODO: implement efficiently
+  for(std::map<pid_t, int>::iterator it = pidInstance.begin(); 
+    it != pidInstance.end(); ++it) {
+    if(it->second == instNum)
+      pid = it->first;
+  }
+  while(instanceIsRunning(instNum)) {
+    result = waitpid(pid, &status, 0);
+    if(result != -1)
       reapProcess(pid, WEXITSTATUS(status));
   }
 }

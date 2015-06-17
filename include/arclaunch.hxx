@@ -3,7 +3,7 @@
 #include "Node.hxx"
 #include "NodeStorage.hxx"
 #include "NodeContext.hxx"
-#include "FileNode.hxx"
+// #include "FileNode.hxx"
 #include "ExecutableNode.hxx"
 #include "ScriptNode.hxx"
 #include "LaunchNode.hxx"
@@ -19,7 +19,7 @@ NodeContext& context() {
   static bool first(true);
   static NodeContext ctx;
   if(first) {
-    notify<FileNode, file_t>(ctx);
+    // notify<FileNode, file_t>(ctx);
     notify<ExecutableNode, executable_t>(ctx);
     notify<ScriptNode, script_t>(ctx);
     notify<LaunchNode, launch_t>(ctx);

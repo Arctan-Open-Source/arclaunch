@@ -7,11 +7,12 @@ namespace arclaunch {
 GroupNode::GroupNode(NodeContext& ctx, const group_t& groupElem) {
   // Emplace the nodes in the group
   for(group_t::node_const_iterator it = groupElem.node().begin();
-    it != groupElem.node().end(); ++it)
+    it != groupElem.node().end(); ++it) {
     if(Node* newNode = &ctx.execute(*it))
       nodes[it->name()] = newNode;
     else
       throw NodeConstructionError();
+  }
 }
 
 GroupNode::~GroupNode() {

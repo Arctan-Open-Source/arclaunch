@@ -5,14 +5,22 @@
 namespace arclaunch {
 
 class LaunchNode : public GroupNode {
+private:
+  class LaunchInstance {
+  public:
+    LaunchNode* owner;
+    int instNum;
+    std::map<Node*, int> nodeInstances;
+  };
+  std::map<int, LaunchInstance> instances;
+  static void onSubNodeDeath(int retval, Node* subNode, void* launchInst, int instNum);
 protected:
   launch_t::linkage_sequence links;
+  virtual void startInstance(int instNum);
 public:
   LaunchNode(NodeContext& ctx, const launch_t& launchElem);
   virtual ~LaunchNode();
-  virtual void startup();
-  virtual bool isRunning() const;
-  virtual void waitFor();
+  virtual void waitForInstance(int instNum);
 };
 
 }
