@@ -22,16 +22,19 @@ private:
   int protocol;
   addrinfo* res;
   void prepareAccept(Addr* addr);
-  void acceptConnections();
+  void acceptConnections(int instNum);
   // the threads used for accepting connections
   std::thread accThread;
   std::atomic<bool> keep;
+  // The instance running the accepting thread
+  int accInst;
+protected:
+  virtual void startInstance(int instNum);
 public:
   SocketNode(NodeContext& ctx, const socket_node_t& elem);
   virtual ~SocketNode();
-  virtual void startup();
+  virtual void waitForInstance(int instNum);
   // need to choose a port and an interface, domain name, or an address
-  virtual void waitFor();
 };
 
 }

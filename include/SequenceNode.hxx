@@ -12,15 +12,38 @@ namespace arclaunch {
 
 class SequenceNode : public GroupNode {
 private:
-  unsigned int stage;
+  class RunningSequence : public Node {
+  protected:
+    virtual void startInstance(int instNum);
+  public:
+    SequenceNode* owner;
+    // The instance number assigned by the owner
+    int instNum;
+    // The currently running node
+    Node* currentNode;
+    // The instance number for our instance of the current node
+    int currentStageInstNum;
+    // The index of the currently running node in the sequence
+    int stage;
+    RunningSequence(SequenceNode& possessor);
+    RunningSequence(SequenceNode* possessor);
+    RunningSequence();
+    virtual ~RunningSequence();
+    virtual void waitForInstance(int instNum);
+    static void proceed(int retval, Node* node, void* data, int instNum);
+  };
+  friend class RunningSequence;
+  // Uses the instance number as the index, that should ordinarily work
+  std::map<int, RunningSequence> sequences;
+  // pointers to RunningSequences need to remain valid
   std::vector<std::string> order;
-  static void proceed(int retval, Node* node, void* data);
+  static void finishSequence(int retval, Node* node, void* data, int instNum);
+protected:
+  virtual void startInstance(int instNum);
 public:
   SequenceNode(NodeContext& ctx, const sequence_node_t& sequenceElem);
   virtual ~SequenceNode();
-  virtual void startup();
-  virtual bool isRunning() const;
-  virtual void waitFor();
+  virtual void waitForInstance(int instNum);
 };
 
 }

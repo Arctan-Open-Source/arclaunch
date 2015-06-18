@@ -14,8 +14,9 @@ protected:
 public:
   GroupNode(NodeContext& ctx, const group_t& groupElem);
   virtual ~GroupNode();
-  virtual Node& getNode(std::string name);
+  Node& getNode(std::string name);
 };
+
 // Used when a node fails construction
 class NodeConstructionError : std::exception {
 private:

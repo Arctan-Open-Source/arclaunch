@@ -10,7 +10,7 @@ add_library(arclaunch SHARED
   Node.cxx
   NodeStorage.cxx
   NodeContext.cxx
-  FileNode.cxx
+  # FileNode.cxx
   ExecutableNode.cxx
   ScriptNode.cxx
   GroupNode.cxx

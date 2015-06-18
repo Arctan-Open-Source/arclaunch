@@ -7,28 +7,96 @@
 
 namespace arclaunch {
 
-// Node
-Node::~Node() {
-  // close any unclosed file descriptors
-  closeFds();
-}
-
-Node::Node() {
-}
-
+// CompletionHandler definition
 Node::CompletionHandler::CompletionHandler(Node::CompletionCallback call, void* deathData) {
   callback = call;
   data = deathData;
 }
 
+// private functions
 void Node::closeFds() {
   for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); it++)
     close(it->first);
   fdMap.clear();
 }
 
+// protected functions
+void Node::finishInstance(int instNum, int retval) {
+  if(!instanceIsRunning(instNum))
+    return;
+  // Call generalized onDeath callbacks
+  for(std::vector<CompletionHandler>::iterator it = onDeath.begin();
+    it != onDeath.end(); ++it)
+    it->callback(retval, this, it->data, instNum);
+  // Call instance based onDeath callbacks
+  for(std::vector<CompletionHandler>::iterator it = instances[instNum].begin();
+    it != instances[instNum].end(); ++it)
+    it->callback(retval, this, it->data, instNum);
+  instances.erase(instNum);
+}
+
+void Node::overwriteFds() {
+  for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end(); 
+    ++it) {
+    if(dup2(it->first, it->second) == -1) {
+      const char* err = "Failed to overwrite pipe\n";
+      write(STDERR_FILENO, err, 27);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
+void Node::passFds(Node& child) {
+  for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end();
+    ++it)
+    child.linkFd(it->second, it->first);
+}
+
+// public functions
+// Node
+
+Node::Node() {
+}
+
+Node::~Node() {
+  // close any unclosed file descriptors
+  closeFds();
+}
+
+int Node::startup() {
+  int newInstNum = 0;
+  while(instanceIsRunning(newInstNum))
+    newInstNum++;
+  startInstance(newInstNum);
+  // allows startInstance to add more death handlers
+  instances[newInstNum] = onInstanceDeath;
+  onInstanceDeath.clear();
+  closeFds();
+  return newInstNum;
+}
+
+bool Node::instanceIsRunning(int instNum) const {
+  return instances.find(instNum) != instances.end();
+}
+
+bool Node::isRunning() const {
+  return !instances.empty();
+}
+
+void Node::waitFor() {
+  // Can't use iteraters because they could become invalidated
+  while(!instances.empty()) {
+    int num = instances.begin()->first;
+    waitForInstance(num);
+  }
+}
+
 void Node::addCompletionHandler(CompletionCallback handle, void* data) {
   onDeath.emplace_back(handle, data);
+}
+
+void Node::addInstanceCompletionHandler(CompletionCallback handle, void* data) {
+  onInstanceDeath.emplace_back(handle, data);
 }
 
 void Node::linkFd(int fd, int extFd) {
@@ -91,7 +159,8 @@ bool Node::isWritable(int fd) {
   return fileFlags == O_WRONLY || fileFlags == O_RDWR;
 }
 
-// Templatize these? Use functional features of C++11?
+
+// public static functions
 std::vector<std::vector<char> > Node::argSequenceToArgData(executable_t::arg_sequence& args) {
   std::vector<std::vector<char> > argData;
   for(executable_t::arg_iterator it = args.begin();

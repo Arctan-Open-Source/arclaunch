@@ -35,6 +35,18 @@ function(TEST_TEMPLATE TEMPLATE_NAME TEST_NAME LAUNCH_FILE)
   add_test(NAME test_${TEST_NAME}_${TEMPLATE_NAME} COMMAND ${TEMPLATE_NAME}_${TEST_NAME}_test)
 endfunction(TEST_TEMPLATE)
 
+# Create unit tests based on the basic Node
+add_executable(node_test 
+  NodeTest.cxx
+  )
+
+target_link_libraries(node_test
+  gtest_main
+  arclaunch
+  )
+
+add_test(test_node node_test)
+
 # Matching tests are built to run for each language
 function(ADD_STDOUT_TEST TEST_NAME LAUNCH_FILE)
   TEST_TEMPLATE(stdout ${TEST_NAME} ${LAUNCH_FILE})

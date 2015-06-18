@@ -8,7 +8,7 @@ install(
     ${LAUNCH_HEADER}
     arclaunch.hxx
     ExecutableNode.hxx
-    FileNode.hxx
+    # FileNode.hxx
     GroupNode.hxx
     LaunchNode.hxx
     NodeContext.hxx
