@@ -55,7 +55,7 @@ void ExecutableNode::startInstance(int instNum) {
   if(!reaping) {
     reaping = true;
     reap.sa_sigaction = reaper;
-    reap.sa_flags = SA_NOCLDSTOP;
+    reap.sa_flags = SA_NOCLDSTOP | SA_RESTART;
     sigaction(SIGCHLD, &reap, NULL);
   }
   // construct the argument list
