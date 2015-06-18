@@ -65,7 +65,7 @@ void SocketNode::prepareAccept(Addr* addr) {
   keep = true;
 }
 
-void SocketNode::acceptConnections() {
+void SocketNode::acceptConnections(int instNum) {
   fd_set read_set;
   // start accepting connections
   // the accepted address
@@ -92,31 +92,43 @@ void SocketNode::acceptConnections() {
       }
       close(sockFd);
       // Use LaunchNode version of startup
-      LaunchNode::startup();
+      startup();
     }
     FD_ZERO(&read_set);
     for(std::vector<int>::iterator it = fds.begin(); it != fds.end(); ++it)
       FD_SET(*it, &read_set);
     numAccSock = select(maxfd + 1, &read_set, NULL, NULL, &tout);
   } while(keep);
+  finishInstance(instNum, 0);
 }
 
-void SocketNode::startup() {
-  // Start the accepting sockets
-  // Create an accepting socket
-  prepareAccept(res);
-  // start the thread
-  accThread = std::thread(&SocketNode::acceptConnections, this);
+void SocketNode::startInstance(int instNum) {
+  // If any instance is running use LaunchNode's startInstance
+  if(isRunning())
+    LaunchNode::startInstance(instNum);
+  else
+  {
+    // Start the accepting sockets
+    // Create an accepting socket
+    prepareAccept(res);
+    // start the thread
+    accThread = std::thread(&SocketNode::acceptConnections, this, instNum);
+    accInst = instNum;
+  }
 }
 
-void SocketNode::waitFor() {
-  // Setup the threads to stop
-  keep = false;
-  // wait for the thread to stop cleanly
-  if(accThread.joinable())
-    accThread.join();
-  // allow the running sockets to close
-  LaunchNode::waitFor();
+void SocketNode::waitForInstance(int instNum) {
+  if(accInst == instNum) {
+    // Setup the threads to stop
+    keep = false;
+    // wait for the thread to stop cleanly
+    if(accThread.joinable())
+      accThread.join();
+    // allow the running sockets to close
+  }
+  else {
+    LaunchNode::waitForInstance(instNum);
+  }
 }
 
 }

@@ -54,7 +54,7 @@ TEST_F(NodeTest, run_socket) {
     }
   };
   int res = connect(fd, (sockaddr*) &addr, sizeof(sockaddr_in));
-  ASSERT_EQ(res, 0);
+  ASSERT_EQ(0, res);
   // The server should echo back
   const char *write_buffer = "Hello World";
   write(fd, write_buffer, strlen(write_buffer));

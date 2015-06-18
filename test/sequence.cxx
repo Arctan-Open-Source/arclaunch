@@ -89,7 +89,6 @@ TEST_F(NodeTest, parrallel_sequence) {
   connectPipes(outLink2, errLink2);
   elem->startup();
   elem->waitFor();
-  std::cout << "PAST WAIT FOR" << std::endl;
   
   // wait for both running cases to stop
   std::string empty("");
