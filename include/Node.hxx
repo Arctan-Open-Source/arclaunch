@@ -64,6 +64,15 @@ protected:
   void passFds(Node& child);
   
   /**
+   *  Can be called by Group nodes to devolve a single linked file descriptor.
+   *  
+   *  @param child The node to which the file descriptor is devolved.
+   *  @param fd The file descriptor to devolve.
+   *  @param childFd The file descriptor as experienced by the child.
+   */
+  void passFd(Node& child, int fd, int childFd);
+  
+  /**
    *  Must be implemented by derived nodes to start an instance of a node.
    * 
    *  @param instNum The instance number for the newly generated instance.

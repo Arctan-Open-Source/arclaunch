@@ -60,6 +60,18 @@
     <xsd:attribute name="to_fd" type="xsd:nonNegativeInteger" default="0" use="optional" />
   </xsd:complexType>
 
+  <xsd:complexType name="externalize_t">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+        This allows a group type nod to devolve a connection to a subnode.
+      </xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:attribute name="node" type="xsd:string" use="required" />
+    <xsd:attribute name="internal" type="xsd:nonNegativeInteger" use="required" />
+    <xsd:attribute name="external" type="xsd:nonNegativeInteger" use="required" />
+  </xsd:complexType>
+
   <xsd:complexType name="env_t">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
@@ -243,6 +255,13 @@
               </xsd:documentation>
             </xsd:annotation>
           </xsd:element>
+          <xsd:element name="externalize" type="externalize_t" minOccurs="0" maxOccurs="unbounded">
+            <xsd:annotation>
+              <xsd:documentation xml:lang="en">
+                Used to allow redirecting standard pipes beyond the launch group.
+              </xsd:documentation>
+            </xsd:annotation>
+          </xsd:element>
         </xsd:sequence>
       </xsd:extension>
     </xsd:complexContent>
@@ -298,6 +317,7 @@
     </xsd:annotation>
     
     <!-- Things are about to get a bit crazy with unique, key, and keyref -->
+    <!-- Need exception to unique, key, keyref for external -->
     <xsd:key name="nodes">
       <xsd:selector xpath="node" />
       <xsd:field xpath="@name" />

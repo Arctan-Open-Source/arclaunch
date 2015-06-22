@@ -22,15 +22,19 @@ void LaunchNode::startInstance(int instNum) {
   
   // Configure linkage between nodes
   for(launch_t::linkage_const_iterator it = links.begin();
-    it < links.end(); it++) {
-    // Can only link files and programs from the same launch node
+    it < links.end(); ++it) {
     int link[2];
     pipe2(link, O_CLOEXEC);
-    getNode(it->from()).linkFd(it->from_fd(), link[1]);
     getNode(it->to()).linkFd(it->to_fd(), link[0]);
+    getNode(it->from()).linkFd(it->from_fd(), link[1]);
     close(link[0]);
     close(link[1]);
   }
+
+  // Configure externalization
+  for(launch_t::externalize_const_iterator it = externals.begin();
+    it != externals.end(); ++it)
+    passFd(getNode(it->node()), it->external(), it->internal());
 
   instances.emplace(
     std::piecewise_construct, 
@@ -54,6 +58,7 @@ LaunchNode::LaunchNode(NodeContext& ctx, const launch_t& launchElem) :
   GroupNode(ctx, launchElem) {
   // copy the linkage information from the launch element
   links = launchElem.linkage();
+  externals = launchElem.externalize();
 }
 
 LaunchNode::~LaunchNode() {}

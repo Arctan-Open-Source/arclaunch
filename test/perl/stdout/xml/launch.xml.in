@@ -13,4 +13,6 @@
       </path>
     </interpreter>
   </node>
+  <externalize node="stdout" internal="1" external="1" />
+  <externalize node="stdout" internal="2" external="2" />
 </launch>

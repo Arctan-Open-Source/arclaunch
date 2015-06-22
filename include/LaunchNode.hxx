@@ -14,8 +14,9 @@ private:
   };
   std::map<int, LaunchInstance> instances;
   static void onSubNodeDeath(int retval, Node* subNode, void* launchInst, int instNum);
-protected:
   launch_t::linkage_sequence links;
+  launch_t::externalize_sequence externals;
+protected:
   virtual void startInstance(int instNum);
 public:
   LaunchNode(NodeContext& ctx, const launch_t& launchElem);

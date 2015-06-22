@@ -11,7 +11,6 @@ class NodeTest : public testing::Test {
 protected:
   std::unique_ptr<launch_t> stdout_file;
   arclaunch::LaunchNode* elem;
-  arclaunch::Node* subElem;
   int outLink[2];
   int errLink[2];
   int outLink2[2];
@@ -25,7 +24,6 @@ void NodeTest::SetUp() {
   stdout_file = launch(STDOUT_LAUNCH);
   elem = dynamic_cast<arclaunch::LaunchNode*>(&arclaunch::context().execute(*stdout_file));
   ASSERT_TRUE(NULL != elem);
-  subElem = &elem->getNode("stdout");
 }
 
 void NodeTest::TearDown() {
@@ -36,8 +34,8 @@ void NodeTest::TearDown() {
 void NodeTest::connectPipes(int *out, int *err) {
   pipe2(out, O_CLOEXEC);
   pipe2(err, O_CLOEXEC);
-  subElem->linkStdout(out[1]);
-  subElem->linkStderr(err[1]);
+  elem->linkStdout(out[1]);
+  elem->linkStderr(err[1]);
   close(out[1]);
   close(err[1]);
 }
@@ -46,7 +44,7 @@ TEST_F(NodeTest, run_stdout) {
   connectPipes(outLink, errLink);
   elem->startup();
   // Let the process complete
-  subElem->waitFor();
+  elem->waitFor();
   // Ensure that stdout works
   std::string empty("");
   std::string out(drainFd(outLink[0]));
@@ -61,7 +59,7 @@ TEST_F(NodeTest, repeat_stdout) {
   // Go through the whole process
   connectPipes(outLink, errLink);
   elem->startup();
-  subElem->waitFor();
+  elem->waitFor();
   // Ensure that stdout works
   std::string out(drainFd(outLink[0]));
   std::string err(drainFd(errLink[0]));
@@ -70,7 +68,7 @@ TEST_F(NodeTest, repeat_stdout) {
   // Repeat the process
   connectPipes(outLink, errLink);
   elem->startup();
-  subElem->waitFor();
+  elem->waitFor();
   out = drainFd(outLink[0]);
   err = drainFd(errLink[0]);
   EXPECT_EQ(empty, err);
@@ -85,7 +83,7 @@ TEST_F(NodeTest, parallel_stdout) {
   elem->startup();
   connectPipes(outLink2, errLink2);
   elem->startup();
-  subElem->waitFor();
+  elem->waitFor();
   std::string out(drainFd(outLink[0]));
   std::string err(drainFd(errLink[0]));
   std::string out2(drainFd(outLink2[0]));

@@ -4,6 +4,7 @@
 // TODO: catch the terminate signal and pass it on to the children
 #include <sys/types.h>
 #include <exception>
+#include <iostream>
 
 namespace arclaunch {
 
@@ -50,6 +51,21 @@ void Node::passFds(Node& child) {
   for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end();
     ++it)
     child.linkFd(it->second, it->first);
+}
+
+void Node::passFd(Node& child, int fd, int childFd) {
+  std::cout << "HAPPENS" << std::endl;
+  std::cout << "SEEKING: " << fd << std::endl;
+  std::cout << "SETTING: " << childFd << std::endl;
+  std::map<int, int>::iterator it;
+  for(it = fdMap.begin(); 
+    it != fdMap.end(); ++it) {
+    std::cout << "FOUND: " << it->second << std::endl;
+    if(it->second == fd) {
+     child.linkFd(childFd, it->first);
+     break;
+    }
+  }
 }
 
 // public functions

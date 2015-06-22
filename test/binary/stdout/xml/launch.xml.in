@@ -6,4 +6,6 @@
       <directory>stdout</directory>
     </path>
   </node>
+  <externalize node="stdout" external="1" internal="1" />
+  <externalize node="stdout" external="2" internal="2" />
 </launch>
