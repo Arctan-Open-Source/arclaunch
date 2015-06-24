@@ -6,7 +6,7 @@ void unmask_ws_frame(struct ws_frame* pack) {
   char* mask;
   size = get_ws_payload_size(pack);
   // Just return early if the frame isn't masked
-  if(!frame_is_masked(pack))
+  if(!ws_frame_is_masked(pack))
     return;
   mask = get_ws_frame_mask(pack);
   // Unset the mask bit

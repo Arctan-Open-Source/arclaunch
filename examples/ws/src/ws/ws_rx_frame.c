@@ -11,8 +11,10 @@ void ws_rx_frame(struct ws_connection* conn) {
   size_t payload_size = get_ws_payload_size(&pack);
   // Receive the payload
   conn->rx(payload_size, pack.payload, conn->rx_data);
+  // Unmask the payload
+  unmask_ws_frame(&pack);
   // Handle the frame
-  conn->frame_handlers.array[pack.opcode](conn, &pack, &(conn->buffer));
+  conn->frame_handlers.array[get_ws_opcode(&pack)](conn, &pack, &(conn->buffer));
   // Deallocate the payload
   free_ws_payload(&pack);
 }

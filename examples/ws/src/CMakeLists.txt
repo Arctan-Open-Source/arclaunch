@@ -48,6 +48,7 @@ add_library(ws_simple_frame_handler
   ws_simple/ws_simple_close_handler.c
   ws_simple/ws_simple_ping_handler.c
   ws_simple/ws_simple_pong_handler.c
+  ws_simple/ws_simple_clear_buffer.c
   )
 
 target_link_libraries(ws_simple_frame_handler
@@ -71,6 +72,10 @@ target_link_libraries(ws_fd_encode_decode
 # The encode_decode executable handles websockets
 add_executable(encode_decode
   ws_trans.c
+  )
+
+add_executable(print_pipe
+  print_pipe.c
   )
 
 target_link_libraries(encode_decode

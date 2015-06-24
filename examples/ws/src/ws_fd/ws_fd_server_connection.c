@@ -6,9 +6,9 @@ struct ws_connection make_ws_fd_server_connection(int *in_fd, int*out_fd) {
     WS_SERVER,
     0,
     0, 
-    NULL,
     in_fd,
     out_fd,
+    NULL,
     &ws_fd_rx,
     &ws_fd_tx,
     {
