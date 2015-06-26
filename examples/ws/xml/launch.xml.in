@@ -29,21 +29,9 @@
         </path>
       </node>
     </node>
-    
-    <!-- Make stdouts from the sequences the stdout of the socket -->
-    <externalize node="encode_decode" internal="1" external="1" />
+
     <!-- encode_decode is self contained for handling websockets -->
     <socket from="socket" to="encode_decode" to_fd="3" />
     <socket from="encode_decode" to="socket" from_fd="4" />
   </node>
-
-  <node name="print_pipe" xsi:type="executable_t">
-    <path os="linux" absolute="false">
-      <directory>build</directory>
-      <directory>src</directory>
-      <directory>print_pipe</directory>
-    </path>
-  </node>
-
-  <linkage from="player" to="print_pipe" />
 </launch>

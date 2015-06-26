@@ -68,14 +68,27 @@ target_link_libraries(ws_fd_encode_decode
   ws_encode_decode
   )
 
+# A set of short functions for managing shared memory
+add_library(shared_mem 
+  shared_mem.c
+  )
+
+# Needs threading abilities to control semaphores
+target_link_libraries(shared_mem
+  ${CMAKE_THREAD_LIBS_INIT}
+  )
 
 # The encode_decode executable handles websockets
 add_executable(encode_decode
   ws_trans.c
   )
 
-add_executable(print_pipe
-  print_pipe.c
+add_executable(mem_manage
+  shared_mem_manage.c
+  )
+
+target_link_libraries(mem_manage
+  shared_mem
   )
 
 target_link_libraries(encode_decode
