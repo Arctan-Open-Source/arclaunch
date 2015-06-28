@@ -1,4 +1,6 @@
 #include "shared_mem.h"
+#include <string.h>
+#include <fcntl.h>
 
 void replace_char(char* str, char from, char to) {
   while(*str != 0) {

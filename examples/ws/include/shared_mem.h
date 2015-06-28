@@ -1,5 +1,6 @@
 #ifndef SHARED_MEM_H_
 #define SHARED_MEM_H_
+#include <semaphore.h>
 
 struct meta_page {
   // Used to hold this process until ready to close out
@@ -23,8 +24,21 @@ struct user_page {
 };
 
 void replace_char(char* str, char from, char to);
+
+// Safely initializes the shared memory and meta page
 int create_shared_memory(const char* name);
-int open_shared_memory(const char* name);
+// Safely destroys and unlinks the shared memory and meta page
 void destroy_shared_memory(const char* name);
+
+// Safely opens the shared memory
+int open_shared_memory(const char* name);
+
+// Safely initializes semaphores on the user page
+// and marks it as used
+void init_user_page(struct user_page*);
+
+// Safely destroys semaphores on the user page
+// and marks it as unused
+void destroy_user_page(struct user_page*);
 
 #endif

@@ -73,9 +73,11 @@ add_library(shared_mem
   shared_mem.c
   )
 
+
 # Needs threading abilities to control semaphores
 target_link_libraries(shared_mem
   ${CMAKE_THREAD_LIBS_INIT}
+  ${SHM_LIB}
   )
 
 # The encode_decode executable handles websockets
@@ -93,5 +95,6 @@ target_link_libraries(mem_manage
 
 target_link_libraries(encode_decode
   ws_fd_encode_decode
+  shared_mem
   )
 
