@@ -1,12 +1,19 @@
 # Install details
 message(STATUS "Generated header: ${LAUNCH_HEADER}")
-set(INSTALLED_LAUNCH_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/arclaunch)
-set(INSTALLED_LAUNCH_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/arclaunch PARENT_SCOPE)
+
+# If cpack is used this is wrong
+if(GENERATE_PACKAGE)
+  set(INSTALLED_LAUNCH_INCLUDE_DIR ${CPACK_PACKAGING_INSTALL_PREFIX}/include/arclaunch PARENT_SCOPE)
+else(GENERATE_PACKAGE)
+  set(INSTALLED_LAUNCH_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/arclaunch PARENT_SCOPE)
+endif(GENERATE_PACKAGE)
+
+configure_file(arclaunch.hxx.in ${CMAKE_CURRENT_BINARY_DIR}/arclaunch.hxx)
 
 install(
   FILES
     ${LAUNCH_HEADER}
-    arclaunch.hxx
+    ${CMAKE_CURRENT_BINARY_DIR}/arclaunch.hxx
     ExecutableNode.hxx
     # FileNode.hxx
     GroupNode.hxx
@@ -18,5 +25,5 @@ install(
     SequenceNode.hxx
     SocketNode.hxx
   DESTINATION
-    ${INSTALLED_LAUNCH_INCLUDE_DIR}
+    include/arclaunch
     )

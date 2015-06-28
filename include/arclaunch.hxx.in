@@ -10,6 +10,9 @@
 #include "SequenceNode.hxx"
 #include "SocketNode.hxx"
 
+#define ARCLAUNCH_VERSION_MAJOR @ARCLAUNCH_VERSION_MAJOR@
+#define ARCLAUNCH_VERSION_MINOR @ARCLAUNCH_VERSION_MINOR@
+#define ARCLAUNCH_VERSION_PATCH @ARCLAUNCH_VERSION_PATCH@
 
 #include <iostream>
 namespace arclaunch {

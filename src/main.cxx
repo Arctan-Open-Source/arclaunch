@@ -6,7 +6,10 @@
 #include <sys/stat.h>
 
 void version_act() {
-  std::cout << "Arclaunch version 0.1.0" << std::endl;
+  std::cout << "Arclaunch version " 
+    << ARCLAUNCH_VERSION_MAJOR << "." 
+    << ARCLAUNCH_VERSION_MINOR << "."
+    << ARCLAUNCH_VERSION_PATCH << std::endl;
 }
 
 bool persist(false);

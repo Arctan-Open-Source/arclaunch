@@ -29,27 +29,40 @@ add_executable(launch
   )
 
 target_link_libraries(launch arclaunch)
+set_target_properties(launch PROPERTIES OUTPUT_NAME arclaunch)
 
-set(INSTALLED_LAUNCH_XML_SCHEMA "${CMAKE_INSTALL_PREFIX}/share/arclaunch/launch.xsd" PARENT_SCOPE)
-set(INSTALLED_LAUNCH_EXECUTABLE "${CMAKE_INSTALL_PREFIX}/bin/launch" PARENT_SCOPE)
-set(INSTALLED_LAUNCH_LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/libarclaunch.so" PARENT_SCOPE)
-# Maybe not the cleanest way to handle this
-if(WIN32)
-  set(INSTALLED_LAUNCH_EXECUTABLE "${CMAKE_INSTALL_PREFIX}/bin/launch.exe" PARENT_SCOPE)
-  set(INSTALLED_LAUNCH_LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/arclaunch.dll" PARENT_SCOPE)
-endif(WIN32)
+# CPack introduces some complexity here
+if(GENERATE_PACKAGE)
+  set(INSTALLED_LAUNCH_XML_SCHEMA "${CPACK_PACKAGING_INSTALL_PREFIX}/share/arclaunch/launch.xsd" PARENT_SCOPE)
+  set(INSTALLED_LAUNCH_EXECUTABLE "${CPACK_PACKAGING_INSTALL_PREFIX}/bin/launch" PARENT_SCOPE)
+  set(INSTALLED_LAUNCH_LIBRARIES "${CPACK_PACKAGING_INSTALL_PREFIX}/lib/libarclaunch.so" PARENT_SCOPE)
+  # Maybe not the cleanest way to handle this
+  if(WIN32)
+    set(INSTALLED_LAUNCH_EXECUTABLE "${CPACK_PACKAGING_INSTALL_PREFIX}/bin/launch.exe" PARENT_SCOPE)
+    set(INSTALLED_LAUNCH_LIBRARIES "${CPACK_PACKAGING_INSTALL_PREFIX}/lib/arclaunch.dll" PARENT_SCOPE)
+  endif(WIN32)
+else(GENERATE_PACKAGE)
+  set(INSTALLED_LAUNCH_XML_SCHEMA "${CMAKE_INSTALL_PREFIX}/share/arclaunch/launch.xsd" PARENT_SCOPE)
+  set(INSTALLED_LAUNCH_EXECUTABLE "${CMAKE_INSTALL_PREFIX}/bin/launch" PARENT_SCOPE)
+  set(INSTALLED_LAUNCH_LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/libarclaunch.so" PARENT_SCOPE)
+  # Maybe not the cleanest way to handle this
+  if(WIN32)
+    set(INSTALLED_LAUNCH_EXECUTABLE "${CMAKE_INSTALL_PREFIX}/bin/launch.exe" PARENT_SCOPE)
+    set(INSTALLED_LAUNCH_LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/arclaunch.dll" PARENT_SCOPE)
+  endif(WIN32)
+endif(GENERATE_PACKAGE)
 
 install(
   TARGETS
     launch
     arclaunch
-  LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
   )
 
 install(
   FILES
     xsd/launch.xsd
   DESTINATION
-    ${CMAKE_INSTALL_PREFIX}/share/arclaunch
+    share/arclaunch
     )

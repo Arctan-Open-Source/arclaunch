@@ -26,7 +26,6 @@ FUNCTION(TRY_XSD_EXECUTABLES XSD_EXECUTABLE_NAME XSD_VERSION_NAME)
 			  		/opt/xsd-4.0.0-x86_64-linux-gnu/bin
 			  		/usr/bin
 					ENV PATH )
-    
     IF(XSD_EXEC)
       # Ensure this isn't Mono's xsd
       # Do this by examining the output from version
@@ -39,9 +38,11 @@ FUNCTION(TRY_XSD_EXECUTABLES XSD_EXECUTABLE_NAME XSD_VERSION_NAME)
       IF(CS_ERR_LOCATION EQUAL 0)
         # Older versions use stderr
         SET(VERSIONDATA "${ERRDATA}")
+        SET(CS_LOCATION 0)
       ELSEIF(CS_OUT_LOCATION EQUAL 0)
         # Newer versions use stdout
         SET(VERSIONDATA "${OUTDATA}")
+        SET(CS_LOCATION 0)
       ELSE(CS_ERR_LOCATION EQUAL 0)
         # Couldn't find it in either location
         UNSET(XSD_EXEC CACHE)

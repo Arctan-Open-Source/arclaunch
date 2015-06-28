@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
-project(tryxsd)
+project(arclaunch)
+
+set(ARCLAUNCH_VERSION_MAJOR 1)
+set(ARCLAUNCH_VERSION_MINOR 0)
+set(ARCLAUNCH_VERSION_PATCH 0)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -20,18 +24,44 @@ endif()
 find_package(XSD REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(include ${XSD_INCLUDE_DIR} ${CMAKE_BINARY_DIR}/src)
+include_directories(include ${XSD_INCLUDE_DIR} ${CMAKE_BINARY_DIR}/src ${CMAKE_BINARY_DIR}/include)
 
 add_subdirectory(src)
 add_subdirectory(include)
-add_subdirectory(test)
-
 configure_file(cmake/arclaunch-config.cmake.in 
   ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config.cmake)
 
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config.cmake
   DESTINATION
-    ${CMAKE_INSTALL_PREFIX}/arclaunch
+    share/arclaunch
     )
+
+if(GENERATE_PACKAGE)
+  set(CPACK_PACKAGE_VENDOR "Arctan, Inc.")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A utility for starting up and managing a set of programs in parallel.")
+  set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
+  set(CPACK_PACKAGE_CONTACT "matthew.balch@arctan-group.com")
+  set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+  set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/txt_readme.txt")
+  set(CPACK_PACKAGE_VERSION_MAJOR "${ARCLAUNCH_VERSION_MAJOR}")
+  set(CPACK_PACKAGE_VERSION_MINOR "${ARCLAUNCH_VERSION_MINOR}")
+  set(CPACK_PACKAGE_VERSION_PATCH "${ARCLAUNCH_VERSION_PATCH}")
+  set(CPACK_PACKAGE_EXECUTABLES "arclaunch")
+  
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "xsdcxx (>= 4.0.0) | xsd (>= 4.0.0)")
+  set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
+  set(CPACK_DEBIAN_PACKAGE_PRIORITY "extra")
+  
+  set(CPACK_RPM_PACKAGE_LICENSE "${CPACK_RESOURCE_FILE_LICENSE}")
+  set(CPACK_RPM_PACKAGE_GROUP "Development/Tools")
+  set(CPACK_RPM_PACKAGE_REQUIRES "xsd >= 4.0.0")
+  set(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
+
+  include(CPack)
+endif(GENERATE_PACKAGE)
+
+if(ENABLE_TEST)
+  add_subdirectory(test)
+endif(ENABLE_TEST)
 
