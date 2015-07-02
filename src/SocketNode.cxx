@@ -104,7 +104,7 @@ void SocketNode::acceptConnections(int instNum) {
 
 void SocketNode::startInstance(int instNum) {
   // If any instance is running use LaunchNode's startInstance
-  if(isRunning())
+  if(numInstancesRunning() > 1)
     LaunchNode::startInstance(instNum);
   else
   {

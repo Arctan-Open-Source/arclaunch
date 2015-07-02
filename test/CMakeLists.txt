@@ -44,8 +44,17 @@ target_link_libraries(node_test
   gtest_main
   arclaunch
   )
-
 add_test(test_node node_test)
+
+add_executable(empty_test
+  empty.cxx
+  )
+target_link_libraries(empty_test
+  gtest_main
+  arclaunch
+  )
+configure_file(xml/empty_launch.xml.in ${CMAKE_CURRENT_BINARY_DIR}/xml/empty_launch.xml)
+add_test(test_empty empty_test)
 
 # Matching tests are built to run for each language
 function(ADD_STDOUT_TEST TEST_NAME LAUNCH_FILE)

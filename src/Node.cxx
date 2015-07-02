@@ -78,10 +78,12 @@ int Node::startup() {
   int newInstNum = 0;
   while(instanceIsRunning(newInstNum))
     newInstNum++;
-  startInstance(newInstNum);
   // allows startInstance to add more death handlers
+  // needs to preceed startInstance to allow closing
+  // while starting in cases of no subNodes
   instances[newInstNum] = onInstanceDeath;
   onInstanceDeath.clear();
+  startInstance(newInstNum);
   closeFds();
   return newInstNum;
 }
@@ -92,6 +94,10 @@ bool Node::instanceIsRunning(int instNum) const {
 
 bool Node::isRunning() const {
   return !instances.empty();
+}
+
+int Node::numInstancesRunning() const {
+  return instances.size();
 }
 
 void Node::waitFor() {

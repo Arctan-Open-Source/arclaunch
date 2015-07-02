@@ -50,6 +50,12 @@ void LaunchNode::startInstance(int instNum) {
     it->second->addInstanceCompletionHandler(onSubNodeDeath, inst);
     inst->nodeInstances[it->second] = it->second->startup();
   }
+  // Special case of no subNodes immediately closes out
+  if(inst->nodeInstances.empty())
+  {
+    finishInstance(instNum, 0);
+    instances.erase(instNum);
+  }
 }
 
 // public methods

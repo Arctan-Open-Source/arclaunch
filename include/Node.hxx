@@ -107,6 +107,13 @@ public:
   bool isRunning() const;
 
   /**
+   *  Detects the number of running instances.
+   *
+   *  @return the number of running instances.
+   */
+  int numInstancesRunning() const;
+
+  /**
    *  Blocks execution until the given instance has completed.
    *  
    *  @param the instance to wait for
