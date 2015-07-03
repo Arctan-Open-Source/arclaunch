@@ -1,0 +1,10 @@
+<launch name="single_executable" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:noNamespaceSchemaLocation="@ARCLAUNCH_XML_SCHEMA@">
+  <node name="ls_node" xsi:type="executable_t">
+    <path os="linux" absolute="true">
+      <directory>bin</directory>
+      <directory>ls</directory>
+    </path>
+  </node>
+</launch>
