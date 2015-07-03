@@ -3,7 +3,7 @@ project(arclaunch)
 
 set(ARCLAUNCH_VERSION_MAJOR 1)
 set(ARCLAUNCH_VERSION_MINOR 0)
-set(ARCLAUNCH_VERSION_PATCH 0)
+set(ARCLAUNCH_VERSION_PATCH 1)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -28,11 +28,16 @@ include_directories(include ${XSD_INCLUDE_DIR} ${CMAKE_BINARY_DIR}/src ${CMAKE_B
 
 add_subdirectory(src)
 add_subdirectory(include)
+
+set(LAUNCH_CONFIG_RELATIVE_PATH share/arclaunch)
 configure_file(cmake/arclaunch-config.cmake.in 
-  ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config.cmake)
+  ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config.cmake @ONLY)
+configure_file(cmake/arclaunch-config-version.cmake.in 
+  ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config-version.cmake @ONLY)
 
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/arclaunch-config-version.cmake
   DESTINATION
     share/arclaunch
     )

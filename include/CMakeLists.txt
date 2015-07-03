@@ -1,12 +1,7 @@
 # Install details
 message(STATUS "Generated header: ${LAUNCH_HEADER}")
 
-# If cpack is used this is wrong
-if(GENERATE_PACKAGE)
-  set(INSTALLED_LAUNCH_INCLUDE_DIR ${CPACK_PACKAGING_INSTALL_PREFIX}/include/arclaunch PARENT_SCOPE)
-else(GENERATE_PACKAGE)
-  set(INSTALLED_LAUNCH_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/arclaunch PARENT_SCOPE)
-endif(GENERATE_PACKAGE)
+set(LAUNCH_INCLUDE_DIR_RELATIVE_PATH include/arclaunch PARENT_SCOPE)
 
 configure_file(arclaunch.hxx.in ${CMAKE_CURRENT_BINARY_DIR}/arclaunch.hxx)
 

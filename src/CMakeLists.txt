@@ -32,25 +32,9 @@ target_link_libraries(launch arclaunch)
 set_target_properties(launch PROPERTIES OUTPUT_NAME arclaunch)
 
 # CPack introduces some complexity here
-if(GENERATE_PACKAGE)
-  set(INSTALLED_LAUNCH_XML_SCHEMA "${CPACK_PACKAGING_INSTALL_PREFIX}/share/arclaunch/launch.xsd" PARENT_SCOPE)
-  set(INSTALLED_LAUNCH_EXECUTABLE "${CPACK_PACKAGING_INSTALL_PREFIX}/bin/launch" PARENT_SCOPE)
-  set(INSTALLED_LAUNCH_LIBRARIES "${CPACK_PACKAGING_INSTALL_PREFIX}/lib/libarclaunch.so" PARENT_SCOPE)
-  # Maybe not the cleanest way to handle this
-  if(WIN32)
-    set(INSTALLED_LAUNCH_EXECUTABLE "${CPACK_PACKAGING_INSTALL_PREFIX}/bin/launch.exe" PARENT_SCOPE)
-    set(INSTALLED_LAUNCH_LIBRARIES "${CPACK_PACKAGING_INSTALL_PREFIX}/lib/arclaunch.dll" PARENT_SCOPE)
-  endif(WIN32)
-else(GENERATE_PACKAGE)
-  set(INSTALLED_LAUNCH_XML_SCHEMA "${CMAKE_INSTALL_PREFIX}/share/arclaunch/launch.xsd" PARENT_SCOPE)
-  set(INSTALLED_LAUNCH_EXECUTABLE "${CMAKE_INSTALL_PREFIX}/bin/launch" PARENT_SCOPE)
-  set(INSTALLED_LAUNCH_LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/libarclaunch.so" PARENT_SCOPE)
-  # Maybe not the cleanest way to handle this
-  if(WIN32)
-    set(INSTALLED_LAUNCH_EXECUTABLE "${CMAKE_INSTALL_PREFIX}/bin/launch.exe" PARENT_SCOPE)
-    set(INSTALLED_LAUNCH_LIBRARIES "${CMAKE_INSTALL_PREFIX}/lib/arclaunch.dll" PARENT_SCOPE)
-  endif(WIN32)
-endif(GENERATE_PACKAGE)
+set(LAUNCH_XML_SCHEMA_RELATIVE_PATH "share/arclaunch/launch.xsd" PARENT_SCOPE)
+set(LAUNCH_EXECUTABLE_RELATIVE_PATH "bin/arclaunch" PARENT_SCOPE)
+set(LAUNCH_LIBRARIES_RELATIVE_PATH "lib/libarclaunch.so" PARENT_SCOPE)
 
 install(
   TARGETS

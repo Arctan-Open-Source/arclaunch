@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(ws_example)
-find_package(arclaunch)
+find_package(arclaunch REQUIRED)
 find_package(Threads)
 find_library(SHM_LIB rt)
 if(${SHM_LIB_FOUND})
