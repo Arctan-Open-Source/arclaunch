@@ -1,6 +1,8 @@
 
-set(LAUNCH_XML_SCHEMA ${CMAKE_CURRENT_SOURCE_DIR}/xsd/launch.xsd PARENT_SCOPE)
-XSD_SCHEMA( LAUNCH_SRC xsd/launch.xsd --std c++11 --generate-polymorphic --polymorphic-type node_t )
+configure_file(xsd/launch.xsd.in ${CMAKE_CURRENT_BINARY_DIR}/xsd/launch.xsd)
+
+set(LAUNCH_XML_SCHEMA ${CMAKE_CURRENT_BINARY_DIR}/xsd/launch.xsd PARENT_SCOPE)
+XSD_SCHEMA( LAUNCH_SRC ${CMAKE_CURRENT_BINARY_DIR}/xsd/launch.xsd --std c++11 --generate-polymorphic --polymorphic-type node_t )
 
 set(LAUNCH_SRC "${LAUNCH_SRC}" PARENT_SCOPE)
 set(LAUNCH_HEADER "${LAUNCH_SRC_HEADER}" PARENT_SCOPE)

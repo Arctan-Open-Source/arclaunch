@@ -4,7 +4,7 @@
 
   <xsd:annotation>
     <xsd:documentation xml:lang="en">
-      Launch file schema for Arclaunch Utility v0.0.1
+      Launch file schema for Arclaunch Utility v@ARCLAUNCH_VERSION_MAJOR@.@ARCLAUNCH_VERSION_MINOR@.@ARCLAUNCH_VERSION_PATCH@
       Released under MIT License
     </xsd:documentation>
   </xsd:annotation>

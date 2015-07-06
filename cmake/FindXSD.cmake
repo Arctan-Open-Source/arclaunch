@@ -144,7 +144,7 @@ FUNCTION( XSD_SCHEMA NAME FILE )
   #
   ADD_CUSTOM_COMMAND( OUTPUT "${xs_CXX}" "${xs_HXX}" "${xs_IXX}"
     COMMAND ${XSD_EXECUTABLE}
-    ARGS "cxx-tree" "--output-dir" "${CMAKE_CURRENT_BINARY_DIR}" ${ARGN} "${CMAKE_CURRENT_SOURCE_DIR}/${xs_SRC}"
+    ARGS "cxx-tree" "--output-dir" "${CMAKE_CURRENT_BINARY_DIR}" ${ARGN} "${xs_SRC}"
     DEPENDS ${xs_SRC} )
 
   #
