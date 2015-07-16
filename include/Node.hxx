@@ -79,7 +79,14 @@ protected:
    */
   virtual void startInstance(int instNum) = 0;
 public:
+  /**
+   * Default constructor doesn't do anything right now.
+   */
   Node();
+
+  /**
+   * Destructor automatically closes all internally managed file descriptors.
+   */
   virtual ~Node();
 
   /**
@@ -176,8 +183,23 @@ public:
   void linkStderr(int fd);
   
   // Useful static methods
+  /**
+   *  Used to verify that a file descriptor is readable.
+   *
+   *  @return true if the file descriptor is readable, false otherwise.
+   */
   static bool isReadable(int fd);
+
+  /**
+   *  Used to verify that a file descriptor is writable.
+   *
+   *  @return false if the file descriptor is writable, false otherwise.
+   */
   static bool isWritable(int fd);
+
+  /**
+   *  
+   */
   static std::vector<std::vector<char> > argSequenceToArgData(executable_t::arg_sequence& args);
   static std::vector<std::vector<char> > envSequenceToEnvData(executable_t::env_sequence& envs);
   static executable_t::arg_sequence fuseArgSequence(executable_t::arg_sequence& args1, executable_t::arg_sequence& args2);

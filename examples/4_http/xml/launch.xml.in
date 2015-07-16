@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch name="remote_gunzip_application" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:noNamespaceSchemaLocation="@ARCLAUNCH_XML_SCHEMA@"
+  xsi:type="socket_node_t"
+  address="localhost"
+  service="8320">
+  <node name="header_process_gunzip" xsi:type="sequence_node_t">
+    <node name="header_process" xsi:type="script_t">
+      <path os="linux" absolute="false">
+        <directory>scripts</directory>
+        <directory>header_handler.pl</directory>
+      </path>
+      <interpreter name="perl_interpreter">
+        <path os="linux" absolute="true">
+          <directory>usr</directory>
+          <directory>bin</directory>
+          <directory>perl</directory>
+        </path>
+      </interpreter>
+    </node>
+    <node name="gunzip" xsi:type="executable_t">
+      <path os="linux" absolute="true">
+        <directory>usr</directory>
+        <directory>bin</directory>
+        <directory>gunzip</directory>
+      </path>
+    </node>
+  </node>
+  <socket from="header_process_gunzip" to="socket" />
+  <socket from="socket" to="header_process_gunzip" />
+</launch>
