@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gunzip Page</title>
+</head>
+<body>
+<h1>Gzip over HTTP</h1>
+<p>
+<form action="gzip.gz" method="POST" enctype="multipart/form-data">
+Gzip: <input name="upload" type="file">
+<input type="submit" value="zip">
+</form>
+</p>
+<p>
+<form action="gunzip" method="POST" enctype="multipart/form-data">
+Gunzip: <input name="upload" type="file">
+<input type="submit" value="unzip">
+</form>
+</p>
+</body>
+</html>
+

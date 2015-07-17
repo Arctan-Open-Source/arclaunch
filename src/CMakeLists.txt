@@ -48,7 +48,7 @@ install(
 
 install(
   FILES
-    xsd/launch.xsd
+    ${CMAKE_CURRENT_BINARY_DIR}/xsd/launch.xsd
   DESTINATION
     share/arclaunch
     )
