@@ -3,3 +3,5 @@ project(ps_example)
 
 find_package(arclaunch 1.0.1 REQUIRED)
 configure_file(xml/launch.xml.in ${CMAKE_CURRENT_BINARY_DIR}/xml/launch.xml)
+
+add_executable(client src/client.c)
