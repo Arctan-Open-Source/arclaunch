@@ -86,9 +86,9 @@ void SocketNode::acceptConnections(int instNum) {
       // Configure linkage between the socket and the nodes
       for(socket_node_t::socket_iterator it = seq.begin(); it != seq.end(); ++it) {
         if(it->from() == "socket")
-          getNode(it->to()).linkFd(it->to_fd(), sockFd);
+          getNode(it->to()).linkFd(it->to_fd(), sockFd, true);
         else if(it->to() == "socket")
-          getNode(it->from()).linkFd(it->from_fd(), sockFd);
+          getNode(it->from()).linkFd(it->from_fd(), sockFd, false);
       }
       close(sockFd);
       // Use LaunchNode version of startup

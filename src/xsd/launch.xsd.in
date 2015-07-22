@@ -193,6 +193,16 @@
             </xsd:annotation>
           </xsd:element>
         </xsd:sequence>
+        <xsd:attribute name="defer" type="xsd:nonNegativeInteger" default="0">
+          <xsd:annotation>
+            <xsd:documentation xml:lang="en">
+              If defer is set to non-zero then the process for the node will not
+              be started until "defer" bytes are written to each incoming file 
+              descriptors for this process. Notably, this means the process might not
+              actually be run.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
       </xsd:extension>
     </xsd:complexContent>
   </xsd:complexType>

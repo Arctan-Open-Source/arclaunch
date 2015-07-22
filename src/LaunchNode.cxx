@@ -25,8 +25,8 @@ void LaunchNode::startInstance(int instNum) {
     it < links.end(); ++it) {
     int link[2];
     pipe2(link, O_CLOEXEC);
-    getNode(it->to()).linkFd(it->to_fd(), link[0]);
-    getNode(it->from()).linkFd(it->from_fd(), link[1]);
+    getNode(it->to()).linkFd(it->to_fd(), link[0], true);
+    getNode(it->from()).linkFd(it->from_fd(), link[1], false);
     close(link[0]);
     close(link[1]);
   }

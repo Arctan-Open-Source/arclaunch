@@ -11,6 +11,7 @@ private:
   executable_t::path_sequence pathSeq;
   executable_t::arg_sequence argSeq;
   executable_t::env_sequence envSeq;
+  unsigned int defer;
   // Used for capturing SIGCHLD gracefully and proper reaping
   static std::map<pid_t, ExecutableNode*> running_nodes;
   

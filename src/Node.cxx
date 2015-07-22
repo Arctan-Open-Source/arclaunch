@@ -3,6 +3,7 @@
 // TODO: vary by operating system
 // TODO: catch the terminate signal and pass it on to the children
 #include <sys/types.h>
+#include <sys/select.h>
 #include <exception>
 
 namespace arclaunch {
@@ -48,8 +49,52 @@ void Node::overwriteFds() {
 
 void Node::passFds(Node& child) {
   for(std::map<int, int>::iterator it = fdMap.begin(); it != fdMap.end();
-    ++it)
-    child.linkFd(it->second, it->first);
+    ++it) {
+    bool input = false;
+    child.linkFd(it->second, it->first, isInput(it->first));
+  }
+}
+
+bool Node::deferReadFds(unsigned int nbytes) {
+  fd_set fds;
+  int maxfd = 0, nfds;
+  std::vector<int> nread(readFds.size(), 0);
+  std::vector<bool> closedEarly(readFds.size(), false);
+  std::vector<char> buffer(nbytes);
+  FD_ZERO(&fds);
+  do {
+    for(int c = 0; c < readFds.size(); c++) {
+      int fd = readFds[c], bytesRead;
+      if(nread[c] >= nbytes || closedEarly[c] || !FD_ISSET(readFds[c], &fds))
+        continue;
+      bytesRead = read(fd, buffer.data(), nbytes - nread[c]);
+      nread[c] += bytesRead;
+      // 0 
+      if(bytesRead == 0 && nread[c] < nbytes) { 
+        // The incoming file descriptor has exited early
+        closedEarly[c] = true;
+      }
+    }
+    FD_ZERO(&fds);
+    for(int c = 0; c < readFds.size(); ++c) {
+      int fd = readFds[c];
+      if(nread[c] >= nbytes)
+        continue;
+      if(maxfd < fd)
+        maxfd = fd;
+      FD_SET(fd, &fds);
+    }
+    ++maxfd;
+  } while(nfds = select(maxfd, &fds, NULL, NULL, NULL));
+}
+
+bool Node::isInput(int fd) {
+  for(std::vector<int>::iterator it = readFds.begin(); 
+    it != readFds.end(); ++it) {
+    if(fd == *it)
+      return true;
+  }
+  return false;
 }
 
 void Node::passFd(Node& child, int fd, int childFd) {
@@ -57,7 +102,7 @@ void Node::passFd(Node& child, int fd, int childFd) {
   for(it = fdMap.begin(); 
     it != fdMap.end(); ++it) {
     if(it->second == fd) {
-     child.linkFd(childFd, it->first);
+     child.linkFd(childFd, it->first, isInput(it->first));
      break;
     }
   }
@@ -116,7 +161,7 @@ void Node::addInstanceCompletionHandler(CompletionCallback handle, void* data) {
   onInstanceDeath.emplace_back(handle, data);
 }
 
-void Node::linkFd(int fd, int extFd) {
+void Node::linkFd(int fd, int extFd, bool input) {
   // fd should be kept small
   // By ensuring nFd is greater than fd, the mapping will be performed such that nFd is never closed by accident
   // because each nFd must be greater than the previous, which is greater than the previous fds
@@ -138,13 +183,15 @@ void Node::linkFd(int fd, int extFd) {
       throw std::exception();
     }
   }
+  if(input)
+    readFds.push_back(nFd);
   fdMap[nFd] = fd;
 }
 
 void Node::linkStdin(int fd) {
   // check that the descriptor is readable
   if(isReadable(fd))
-    linkFd(STDIN_FILENO, fd);
+    linkFd(STDIN_FILENO, fd, true);
   else
     throw std::exception();
 }
@@ -152,7 +199,7 @@ void Node::linkStdin(int fd) {
 void Node::linkStdout(int fd) {
   // check that the descriptor is writable
   if(isWritable(fd))
-    linkFd(STDOUT_FILENO, fd);
+    linkFd(STDOUT_FILENO, fd, false);
   else
     throw std::exception();
 }
@@ -160,7 +207,7 @@ void Node::linkStdout(int fd) {
 void Node::linkStderr(int fd) {
   // check that the descriptor is writable
   if(isWritable(fd))
-    linkFd(STDERR_FILENO, fd);
+    linkFd(STDERR_FILENO, fd, false);
   else
     throw std::exception();
 }

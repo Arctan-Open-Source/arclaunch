@@ -2,6 +2,7 @@
 #include <sys/wait.h>
 #include <exception>
 #include <errno.h>
+#include <sys/select.h>
 
 namespace arclaunch {
 
@@ -48,6 +49,7 @@ ExecutableNode::ExecutableNode(NodeContext& ctx, const executable_t& elem) {
   pathSeq = elem.path();
   argSeq = elem.arg();
   envSeq = elem.env();
+  defer = elem.defer();
 }
 
 // Due to major changes, executable nodes should be reusable
@@ -76,9 +78,13 @@ void ExecutableNode::startInstance(int instNum) {
   
   pid_t pid;
   if((pid = fork()) == 0) {
+    // forked thread
+    // defer startup, possibly exiting if no data is ever passed in
+    // relies on boolean short-circuiting
+    if(defer && deferReadFds(defer))
+      exit(EXIT_SUCCESS);
     // Map the file descriptors to pass to the forked process
     overwriteFds();
-    // forked thread
     // Deduce the proper path
     for(executable_t::path_iterator it = pathSeq.begin(); 
       it != pathSeq.end(); ++it) {

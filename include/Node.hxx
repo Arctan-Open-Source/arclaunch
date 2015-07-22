@@ -35,10 +35,20 @@ private:
     void* data;
   };
   std::map<int, int> fdMap;
+  // used to allow defering
+  std::vector<int> readFds;
   std::vector<CompletionHandler> onDeath;
   std::vector<CompletionHandler> onInstanceDeath;
   std::map<int, std::vector<CompletionHandler> > instances;
   void closeFds();
+
+  /**
+   *  Used to check whether a linked file descriptor is used for input
+   *  Refers to the internal file descriptor, not its mapping
+   *
+   *  @return true if and only if the file descriptor is a linked input
+   */
+  bool isInput(int fd);
 protected:
   /**
    *  Must be called by derived nodes when their instance completes.
@@ -78,6 +88,14 @@ protected:
    *  @param instNum The instance number for the newly generated instance.
    */
   virtual void startInstance(int instNum) = 0;
+  
+  /**
+   *  Used to block the process until the file descriptors are closed or
+   *  nbytes have been written to each non-closed file descriptor.
+   *
+   * @return false if data is received, true if all fds close without receiving
+   */
+  bool deferReadFds(unsigned int nbytes);
 public:
   /**
    * Default constructor doesn't do anything right now.
@@ -153,7 +171,7 @@ public:
    *  @param extFd The file descriptor number as currently experienced by 
    *    arclaunch
    */
-  void linkFd(int fd, int extFd);
+  void linkFd(int fd, int extFd, bool input);
 
   /**
    *  Connects the file descriptor as STDIN for the next instance started.
