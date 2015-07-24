@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch name="external_launch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="@LAUNCH_XML_SCHEMA@">
+  <node name="external" xsi:type="executable_t">
+    <path absolute="false" os="linux">
+      <directory>src</directory>
+      <directory>external</directory>
+    </path>
+  </node>
+  <externalize node="external" internal="0" external="0" />
+  <externalize node="external" internal="1" external="1" />
+  <externalize node="external" internal="2" external="2" />
+</launch>
