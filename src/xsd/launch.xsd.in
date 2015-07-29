@@ -112,7 +112,7 @@
       </xsd:element>
     </xsd:sequence>
 
-    <xsd:attribute name="os" type="os_t">
+    <xsd:attribute name="os" type="os_t" use="required">
       <xsd:annotation>
         <xsd:documentation xml:lang="en">
           An attribute indicating the operating system that this path is relevant to

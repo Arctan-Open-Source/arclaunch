@@ -89,7 +89,7 @@ void ExecutableNode::startInstance(int instNum) {
     for(executable_t::path_iterator it = pathSeq.begin(); 
       it != pathSeq.end(); ++it) {
       // Check if it's the correct OS
-      if(*(it->os()) != OS_STRING)
+      if(it->os() != OS_STRING)
         continue;
       // Construct the path
       std::vector<char> path(pathElemToPathData(*it));

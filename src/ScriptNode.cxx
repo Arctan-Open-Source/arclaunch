@@ -10,7 +10,7 @@ ScriptNode::ScriptNode(NodeContext& ctx, const script_t& scriptElem) :
   executable_t::arg_sequence path;
   for(executable_t::path_const_iterator it = scriptElem.path().begin(); 
     it != scriptElem.path().end(); it++) {
-    if(*(it->os()) == OS_STRING) {
+    if(it->os() == OS_STRING) {
       std::vector<char> aPath = pathElemToPathData(*it);
       path.push_back(aPath.data());
       break;
